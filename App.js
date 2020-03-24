@@ -27,7 +27,7 @@ import {
 const App: () => React$Node = () => {
   return (
     <>
-      <Text>Hello</Text>
+      <Text>Hello Pranav</Text>
     </>
   );
 };
