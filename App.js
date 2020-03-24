@@ -27,6 +27,11 @@ import {
 import {NavigationContainer} from '@react-navigation/native';
 import {createStackNavigator} from '@react-navigation/stack';
 import {createBottomTabNavigator} from '@react-navigation/bottom-tabs';
+import * as Actions from './store/actions/SaveAction';
+import {useDispatch, useSelector} from 'react-redux';
+import {createStore} from 'redux';
+import {Provider} from 'react-redux';
+import saveReducer from './store/reducer/SaveReducer';
 
 const Stack = createStackNavigator();
 const Tab = createBottomTabNavigator();
@@ -43,7 +48,12 @@ const HomeTabNavigator = () => {
   );
 };
 
-const HomeStackNavigator = () => {
+const HomeStackNavigator = ({navigation, route}) => {
+  if (route.state) {
+    navigation.setOptions({
+      tabBarVisible: route.state.index > 0 ? false : true,
+    });
+  }
   return (
     <HomeStack.Navigator>
       <HomeStack.Screen name="Home" component={HomeScreen} />
@@ -56,21 +66,41 @@ const HomeStackNavigator = () => {
 };
 
 function HomeScreen({navigation}) {
+  const dispatch = useDispatch();
+  const data = {
+    name: 'Chips',
+    brand: 'Lays',
+  };
   return (
     <View style={{flex: 1, justifyContent: 'center', alignItems: 'center'}}>
       <Text>Home!</Text>
       <Button
         title="Recipe details"
-        onPress={() => navigation.navigate('RecipeDetailsScreen')}
+        onPress={() => {
+          navigation.navigate('RecipeDetailsScreen');
+          dispatch(Actions.saveRecipe(data));
+        }}
       />
     </View>
   );
 }
 
 function SavedRecipeScreen() {
+  const userDataInStore = useSelector(state => state.recipes);
+  console.log('userDataInStore', userDataInStore);
+
   return (
     <View style={{flex: 1, justifyContent: 'center', alignItems: 'center'}}>
       <Text>Saved Recipes!</Text>
+      {userDataInStore.map((item, index) => {
+        return (
+          <View>
+            <Text>Recipe Number {index}</Text>
+            <Text>Recipe Type : {item.name}</Text>
+            <Text>Brand Name : {item.brand}</Text>
+          </View>
+        );
+      })}
     </View>
   );
 }
@@ -118,23 +148,27 @@ function getHeaderTitle(route) {
   }
 }
 
+const store = createStore(saveReducer);
+
 const App: () => React$Node = () => {
   return (
     <>
-      <NavigationContainer>
-        <Stack.Navigator>
-          <Stack.Screen
-            name="home"
-            component={HomeTabNavigator}
-            options={({route}) => ({
-              title: getHeaderTitle(route),
-              headerShown: shouldHeaderBeShown(route),
-            })}
-          />
-          <Stack.Screen name="Saved" component={SavedRecipeScreen} />
-          <Stack.Screen name="Profile" component={ProfileScreen} />
-        </Stack.Navigator>
-      </NavigationContainer>
+      <Provider store={store}>
+        <NavigationContainer>
+          <Stack.Navigator>
+            <Stack.Screen
+              name="home"
+              component={HomeTabNavigator}
+              options={({route}) => ({
+                title: getHeaderTitle(route),
+                headerShown: shouldHeaderBeShown(route),
+              })}
+            />
+            <Stack.Screen name="Saved" component={SavedRecipeScreen} />
+            <Stack.Screen name="Profile" component={ProfileScreen} />
+          </Stack.Navigator>
+        </NavigationContainer>
+      </Provider>
     </>
   );
 };
