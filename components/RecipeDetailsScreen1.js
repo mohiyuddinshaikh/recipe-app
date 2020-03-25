@@ -1,5 +1,5 @@
 import React, {useState, useEffect} from 'react';
-import {View, Text, FlatList, Button, ImageBackground} from 'react-native';
+import {View, Text, FlatList, Button, ImageBackground, Platform} from 'react-native';
 import {useDispatch, useSelector} from 'react-redux';
 import * as Actions from '../store/actions/SaveAction';
 import Icon from 'react-native-vector-icons/FontAwesome';
@@ -7,19 +7,17 @@ import Icon from 'react-native-vector-icons/FontAwesome';
 export default function RecipeDetailsScreen1({route}) {
   const dispatch = useDispatch();
   const recipeDataInStore = useSelector(state => state.recipes);
-  console.log(route);
+  console.log(route.params);
   console.log('route', route);
   const itemName = route.params.name;
   const itemCalories = route.params.calories;
+  const itemPrice = route.params.price;
+  const itemDescription = route.params.description;
+  const itemIngrediants = route.params.ingrediants;
+  let itemImagePath = itemName.toString().toLowerCase();
+  console.log(itemImagePath)
   const [isRecipeSaved, setIsRecipeSaved] = useState(false);
-  let detailsObj = {
-    ingrediants: 10,
-    name: 'Pizza',
-    description:
-      'Pizza is bsjhaj jajksdkjsna jajndknds naDKJDkjajKJ JKNDajNKK good for health.',
-    price: '100',
-    calories: '100',
-  };
+  
 
   useEffect(() => {
     checkIfRecipeSaved();
@@ -39,26 +37,26 @@ export default function RecipeDetailsScreen1({route}) {
   return (
     <View style={styles.container}>
       <ImageBackground
-        source={require('../assets/pizza.jpeg')}
+        source={{uri :`asset:/images/${itemImagePath}.jpeg`}}
         style={{width: '100%', height: '100%'}}></ImageBackground>
       <View style={styles.nameTile}>
-        <Text style={styles.nameText}>Pizza</Text>
+        <Text style={styles.nameText}>{itemName}</Text>
       </View>
       <View style={styles.description}>
-        <Text>{detailsObj.description}</Text>
+        <Text>{itemDescription}</Text>
       </View>
       <View style={styles.stats}>
         <View style={styles.iconPad}>
           <Icon name="tachometer" color="green" size={30} />
-          <Text style={{color: 'green'}}>{detailsObj.calories}</Text>
+          <Text style={{color: 'green'}}>{itemCalories}</Text>
         </View>
         <View style={styles.iconPad}>
           <Icon name="money" size={30} color="red" />
-          <Text style={{color: 'red'}}>{detailsObj.price}</Text>
+          <Text style={{color: 'red'}}>{itemPrice}</Text>
         </View>
         <View style={styles.iconPad}>
           <Icon name="th-list" color="cyan" size={30} />
-          <Text style={{color: 'cyan'}}>{detailsObj.ingrediants}</Text>
+          <Text style={{color: 'cyan'}}>{itemIngrediants}</Text>
         </View>
       </View>
       <View style={styles.saveBtn}>

@@ -9,11 +9,11 @@ let HomeScreen1 = ({navigation}) => {
   console.log('recipeDataInStore', recipeDataInStore);
 
   const [recipes, setRecipes] = useState([
-    {key: '1200', name: 'Pizza', calories: 10},
-    {key: '1201', name: 'Biryani', calories: 20},
-    {key: '1202', name: 'Marshmellow', calories: 30},
-    {key: '1203', name: 'Burger', calories: 40},
-    {key: '1204', name: 'Pasta', calories: 35},
+    {key: '1200', name: 'Pizza', calories: 10, description:'Pizza is bsjhaj jajksdkjsna jajndknds naDKJDkjajKJ JKNDajNKK good for health.', price: '100', ingrediants: "10"},
+    {key: '1201', name: 'Biryani', calories: 20, description:'Biryani is bsjhaj jajksdkjsna jajndknds naDKJDkjajKJ JKNDajNKK good for health.', price: '100', ingrediants: "15"},
+    {key: '1202', name: 'Marshmellow', calories: 30, description:'Marshmellow is bsjhaj jajksdkjsna jajndknds naDKJDkjajKJ JKNDajNKK good for health.', price: '100', ingrediants: "14"},
+    {key: '1203', name: 'Burger', calories: 40, description:'Burger is bsjhaj jajksdkjsna jajndknds naDKJDkjajKJ JKNDajNKK good for health.', price: '100', ingrediants: "13"},
+    {key: '1204', name: 'Pasta', calories: 35, description:'Pasta is bsjhaj jajksdkjsna jajndknds naDKJDkjajKJ JKNDajNKK good for health.', price: '100', ingrediants: "12"},
   ]);
   const dispatch = useDispatch();
 
@@ -26,7 +26,7 @@ let HomeScreen1 = ({navigation}) => {
             onPress={() => {
               let data = {
                 name: item.name,
-                calories: item.calories,
+                calories: item.calories
               };
               navigation.navigate('RecipeDetailsScreen', data);
             }}>
@@ -39,6 +39,9 @@ let HomeScreen1 = ({navigation}) => {
                     let data = {
                       name: item.name,
                       calories: item.calories,
+                      description: item.description,
+                      price: item.price,
+                      ingrediants: item.ingrediants
                     };
                     navigation.navigate('RecipeDetailsScreen', data);
                   }}
