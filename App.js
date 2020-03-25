@@ -32,6 +32,7 @@ import {useDispatch, useSelector} from 'react-redux';
 import {createStore} from 'redux';
 import {Provider} from 'react-redux';
 import saveReducer from './store/reducer/SaveReducer';
+import HomeScreen1 from './components/HomeScreen';
 
 const Stack = createStackNavigator();
 const Tab = createBottomTabNavigator();
@@ -56,7 +57,7 @@ const HomeStackNavigator = ({navigation, route}) => {
   }
   return (
     <HomeStack.Navigator>
-      <HomeStack.Screen name="Home" component={HomeScreen} />
+      <HomeStack.Screen name="Home" component={HomeScreen1} />
       <HomeStack.Screen
         name="RecipeDetailsScreen"
         component={RecipeDetailsScreen}
@@ -75,10 +76,11 @@ function HomeScreen({navigation}) {
     <View style={{flex: 1, justifyContent: 'center', alignItems: 'center'}}>
       <Text>Home!</Text>
       <Button
-        title="Recipe details"
+        title="Save Recipe details"
         onPress={() => {
           navigation.navigate('RecipeDetailsScreen');
           dispatch(Actions.saveRecipe(data));
+          alert('Recipe saved in saved tab!');
         }}
       />
     </View>
@@ -97,7 +99,8 @@ function SavedRecipeScreen() {
           <View>
             <Text>Recipe Number {index}</Text>
             <Text>Recipe Type : {item.name}</Text>
-            <Text>Brand Name : {item.brand}</Text>
+            {/* <Text>Brand Name : {item.brand}</Text> */}
+            <Text>Calories : {item.calories}</Text>
           </View>
         );
       })}
