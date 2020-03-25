@@ -5,17 +5,22 @@ import * as Actions from '../store/actions/SaveAction';
 import {useDispatch, useSelector} from 'react-redux';
 
 let HomeScreen1 = ({navigation}) => {
-  const [getRecipes, setRecipes] = useState([
+  const recipeDataInStore = useSelector(state => state.recipes);
+  console.log('recipeDataInStore', recipeDataInStore);
+
+  const [recipes, setRecipes] = useState([
     {key: '1200', name: 'Pizza', calories: 10},
     {key: '1201', name: 'Biryani', calories: 20},
     {key: '1202', name: 'Marshmellow', calories: 30},
+    {key: '1203', name: 'Burger', calories: 40},
+    {key: '1204', name: 'Pasta', calories: 35},
   ]);
   const dispatch = useDispatch();
 
   return (
     <View style={styles.container}>
       <FlatList
-        data={getRecipes}
+        data={recipes}
         renderItem={({item}) => (
           <View style={styles.item}>
             <Text style={styles.itemText}>{item.name}</Text>
@@ -23,14 +28,21 @@ let HomeScreen1 = ({navigation}) => {
               <Button
                 title="Details"
                 onPress={() => {
-                  navigation.navigate('RecipeDetailsScreen');
                   let data = {
                     name: item.name,
                     calories: item.calories,
                   };
-                  dispatch(Actions.saveRecipe(data));
-                  alert('Recipe saved in saved tab!');
-                }}></Button>
+                  navigation.navigate('RecipeDetailsScreen', data);
+                }}
+              />
+
+              {recipeDataInStore.map(recipeItem =>
+                recipeItem.name === item.name ? (
+                  <View>
+                    <Text style={{color: 'white'}}>Saved</Text>
+                  </View>
+                ) : null,
+              )}
             </View>
           </View>
         )}

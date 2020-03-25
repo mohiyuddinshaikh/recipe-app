@@ -33,6 +33,8 @@ import {createStore} from 'redux';
 import {Provider} from 'react-redux';
 import saveReducer from './store/reducer/SaveReducer';
 import HomeScreen1 from './components/HomeScreen';
+import SavedRecipeScreen1 from './components/SavedRecipeScreen1';
+import RecipeDetailsScreen1 from './components/RecipeDetailsScreen1';
 
 const Stack = createStackNavigator();
 const Tab = createBottomTabNavigator();
@@ -60,7 +62,7 @@ const HomeStackNavigator = ({navigation, route}) => {
       <HomeStack.Screen name="Home" component={HomeScreen1} />
       <HomeStack.Screen
         name="RecipeDetailsScreen"
-        component={RecipeDetailsScreen}
+        component={RecipeDetailsScreen1}
       />
     </HomeStack.Navigator>
   );
@@ -167,7 +169,7 @@ const App: () => React$Node = () => {
                 headerShown: shouldHeaderBeShown(route),
               })}
             />
-            <Stack.Screen name="Saved" component={SavedRecipeScreen} />
+            <Stack.Screen name="Saved" component={SavedRecipeScreen1} />
             <Stack.Screen name="Profile" component={ProfileScreen} />
           </Stack.Navigator>
         </NavigationContainer>
