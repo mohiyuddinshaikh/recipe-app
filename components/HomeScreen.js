@@ -1,5 +1,5 @@
 import React, {useState} from 'react';
-import {View, Text, FlatList, Button} from 'react-native';
+import {View, Text, FlatList, Button, TouchableOpacity} from 'react-native';
 import * as Actions from '../store/actions/SaveAction';
 
 import {useDispatch, useSelector} from 'react-redux';
@@ -22,29 +22,38 @@ let HomeScreen1 = ({navigation}) => {
       <FlatList
         data={recipes}
         renderItem={({item}) => (
-          <View style={styles.item}>
-            <Text style={styles.itemText}>{item.name}</Text>
-            <View style={styles.itemButton}>
-              <Button
-                title="Details"
-                onPress={() => {
-                  let data = {
-                    name: item.name,
-                    calories: item.calories,
-                  };
-                  navigation.navigate('RecipeDetailsScreen', data);
-                }}
-              />
+          <TouchableOpacity
+            onPress={() => {
+              let data = {
+                name: item.name,
+                calories: item.calories,
+              };
+              navigation.navigate('RecipeDetailsScreen', data);
+            }}>
+            <View style={styles.item}>
+              <Text style={styles.itemText}>{item.name}</Text>
+              <View style={styles.itemButton}>
+                <Button
+                  title="Details"
+                  onPress={() => {
+                    let data = {
+                      name: item.name,
+                      calories: item.calories,
+                    };
+                    navigation.navigate('RecipeDetailsScreen', data);
+                  }}
+                />
 
-              {recipeDataInStore.map(recipeItem =>
-                recipeItem.name === item.name ? (
-                  <View>
-                    <Text style={{color: 'white'}}>Saved</Text>
-                  </View>
-                ) : null,
-              )}
+                {recipeDataInStore.map(recipeItem =>
+                  recipeItem.name === item.name ? (
+                    <View>
+                      <Text style={{color: 'white'}}>Saved</Text>
+                    </View>
+                  ) : null,
+                )}
+              </View>
             </View>
-          </View>
+          </TouchableOpacity>
         )}
       />
     </View>
