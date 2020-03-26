@@ -7,7 +7,7 @@ export default function SavedRecipeScreen1({route}) {
 
   return (
     <View style={{flex: 1, justifyContent: 'center', alignItems: 'center'}}>
-      <Text>Saved Recipes!</Text>
+      <Text>Helllooooo</Text>
       {userDataInStore.map((item, index) => {
         return (
           <View>

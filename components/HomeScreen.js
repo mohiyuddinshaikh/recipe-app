@@ -9,7 +9,7 @@ let HomeScreen1 = ({navigation}) => {
   console.log('recipeDataInStore', recipeDataInStore);
 
   const [recipes, setRecipes] = useState([
-    {key: '1200', name: 'Pizza', calories: 10, description:'Pizza is bsjhaj jajksdkjsna jajndknds naDKJDkjajKJ JKNDajNKK good for health.', price: '100', ingrediants: "10"},
+    {key: '1200', name: 'Pizza12344', calories: 10, description:'Pizza is bsjhaj jajksdkjsna jajndknds naDKJDkjajKJ JKNDajNKK good for health.', price: '100', ingrediants: "10"},
     {key: '1201', name: 'Biryani', calories: 20, description:'Biryani is bsjhaj jajksdkjsna jajndknds naDKJDkjajKJ JKNDajNKK good for health.', price: '100', ingrediants: "15"},
     {key: '1202', name: 'Marshmellow', calories: 30, description:'Marshmellow is bsjhaj jajksdkjsna jajndknds naDKJDkjajKJ JKNDajNKK good for health.', price: '100', ingrediants: "14"},
     {key: '1203', name: 'Burger', calories: 40, description:'Burger is bsjhaj jajksdkjsna jajndknds naDKJDkjajKJ JKNDajNKK good for health.', price: '100', ingrediants: "13"},
