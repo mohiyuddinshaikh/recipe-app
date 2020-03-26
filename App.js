@@ -16,13 +16,21 @@ import {
   StatusBar,
   Button,
 } from 'react-native';
-import { NavigationContainer } from '@react-navigation/native';
-import { createStackNavigator } from '@react-navigation/stack';
-import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
+
+import {
+  Header,
+  LearnMoreLinks,
+  Colors,
+  DebugInstructions,
+  ReloadInstructions,
+} from 'react-native/Libraries/NewAppScreen';
+import {NavigationContainer} from '@react-navigation/native';
+import {createStackNavigator} from '@react-navigation/stack';
+import {createBottomTabNavigator} from '@react-navigation/bottom-tabs';
 import * as Actions from './store/actions/SaveAction';
-import { useDispatch, useSelector } from 'react-redux';
-import { createStore } from 'redux';
-import { Provider } from 'react-redux';
+import {useDispatch, useSelector} from 'react-redux';
+import {createStore} from 'redux';
+import {Provider} from 'react-redux';
 import saveReducer from './store/reducer/SaveReducer';
 import HomeScreen1 from './components/HomeScreen';
 import SavedRecipeScreen1 from './components/SavedRecipeScreen1';
@@ -36,8 +44,8 @@ const HomeStack = createStackNavigator();
 const HomeTabNavigator = () => {
   return (
     <Tab.Navigator
-      screenOptions={({ route }) => ({
-        tabBarIcon: ({ focused, color, size }) => {
+      screenOptions={({route}) => ({
+        tabBarIcon: ({focused, color, size}) => {
           let iconName;
           if (route.name === 'Home') {
             iconName = focused ? 'home' : 'home';
@@ -46,6 +54,7 @@ const HomeTabNavigator = () => {
           } else if (route.name === 'Profile') {
             iconName = focused ? 'user' : 'user';
           }
+
           // You can return any component that you like here!
           return <Icon name={iconName} size={size} color={color} />;
         },
@@ -58,7 +67,7 @@ const HomeTabNavigator = () => {
   );
 };
 
-const HomeStackNavigator = ({ navigation, route }) => {
+const HomeStackNavigator = ({navigation, route}) => {
   if (route.state) {
     navigation.setOptions({
       tabBarVisible: route.state.index > 0 ? false : true,
@@ -75,63 +84,63 @@ const HomeStackNavigator = ({ navigation, route }) => {
   );
 };
 
-// function HomeScreen({navigation}) {
-//   const dispatch = useDispatch();
-//   const data = {
-//     name: 'Chips',
-//     brand: 'Lays',
-//   };
-//   return (
-//     <View style={{flex: 1, justifyContent: 'center', alignItems: 'center'}}>
-//       <Text>Home!</Text>
-//       <Button
-//         title="Save Recipe details"
-//         onPress={() => {
-//           navigation.navigate('RecipeDetailsScreen');
-//           dispatch(Actions.saveRecipe(data));
-//           alert('Recipe saved in saved tab!');
-//         }}
-//       />
-//     </View>
-//   );
-// }
+function HomeScreen({navigation}) {
+  const dispatch = useDispatch();
+  const data = {
+    name: 'Chips',
+    brand: 'Lays',
+  };
+  return (
+    <View style={{flex: 1, justifyContent: 'center', alignItems: 'center'}}>
+      <Text>Home!</Text>
+      <Button
+        title="Save Recipe details"
+        onPress={() => {
+          navigation.navigate('RecipeDetailsScreen');
+          dispatch(Actions.saveRecipe(data));
+          alert('Recipe saved in saved tab!');
+        }}
+      />
+    </View>
+  );
+}
 
-// function SavedRecipeScreen() {
-//   const userDataInStore = useSelector(state => state.recipes);
-//   console.log('userDataInStore', userDataInStore);
+function SavedRecipeScreen() {
+  const userDataInStore = useSelector(state => state.recipes);
+  console.log('userDataInStore', userDataInStore);
 
-return (
-  <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
-    <Text>Saved Recipes!</Text>
-    {userDataInStore.map((item, index) => {
-      return (
-        <View>
-          <Text>Recipe Number {index}</Text>
-          <Text>Recipe Type : {item.name}</Text>
-          {/* <Text>Brand Name : {item.brand}</Text> */}
-          <Text>Calories : {item.calories}</Text>
-        </View>
-      );
-    })}
-  </View>
-);
+  return (
+    <View style={{flex: 1, justifyContent: 'center', alignItems: 'center'}}>
+      <Text>Saved Recipes!</Text>
+      {userDataInStore.map((item, index) => {
+        return (
+          <View>
+            <Text>Recipe Number {index}</Text>
+            <Text>Recipe Type : {item.name}</Text>
+            {/* <Text>Brand Name : {item.brand}</Text> */}
+            <Text>Calories : {item.calories}</Text>
+          </View>
+        );
+      })}
+    </View>
+  );
 }
 
 function ProfileScreen() {
   return (
-    <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
+    <View style={{flex: 1, justifyContent: 'center', alignItems: 'center'}}>
       <Text>My profile!</Text>
     </View>
   );
 }
 
-// function RecipeDetailsScreen() {
-//   return (
-//     <View style={{flex: 1, justifyContent: 'center', alignItems: 'center'}}>
-//       <Text>Recipe Details Screen!</Text>
-//     </View>
-//   );
-// }
+function RecipeDetailsScreen() {
+  return (
+    <View style={{flex: 1, justifyContent: 'center', alignItems: 'center'}}>
+      <Text>Recipe Details Screen!</Text>
+    </View>
+  );
+}
 
 function shouldHeaderBeShown(route) {
   const routeName = route.state
@@ -171,7 +180,7 @@ const App: () => React$Node = () => {
             <Stack.Screen
               name="home"
               component={HomeTabNavigator}
-              options={({ route }) => ({
+              options={({route}) => ({
                 title: getHeaderTitle(route),
                 headerShown: shouldHeaderBeShown(route),
               })}

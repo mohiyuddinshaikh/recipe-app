@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, {useState, useEffect} from 'react';
 import {
   View,
   Text,
@@ -6,18 +6,27 @@ import {
   Button,
   TouchableOpacity,
   Image,
+  ImageBackground,
 } from 'react-native';
 import * as Actions from '../store/actions/SaveAction';
 import axios from 'axios';
 import spoonacularApiKey from '../assets/constants/SpoonacularApiKey';
+import Icon from 'react-native-vector-icons/FontAwesome';
+import {useDispatch, useSelector} from 'react-redux';
 
-import { useDispatch, useSelector } from 'react-redux';
-
-let HomeScreen1 = ({ navigation }) => {
+let HomeScreen1 = ({navigation}) => {
   const recipeDataInStore = useSelector(state => state.recipes);
   const [importedRecipes, setImportedRecipes] = useState();
   const [baseUrlSpoonacular, setBaseUrlSpoonacular] = useState();
   console.log('recipeDataInStore', recipeDataInStore);
+  const [x, setx] = useState();
+  console.log('X check kar', x);
+
+  // useEffect(() => {
+  //   console.log('BHAAAAGOOOO');
+  //   setx(recipeDataInStore);
+  // }, [recipeDataInStore]);
+
   useEffect(() => {
     console.log('I ran');
     getRecipeFromApi();
@@ -36,13 +45,14 @@ let HomeScreen1 = ({ navigation }) => {
 
   const dispatch = useDispatch();
 
-  return (
-    <View style={styles.parentBackground}>
+  const renderFlatList = () => {
+    return (
       <FlatList
         data={importedRecipes}
         keyExtractor={item => item.id}
         numColumns={2}
-        renderItem={({ item, index }) => {
+        extraData={x}
+        renderItem={({item, index}) => {
           return (
             <View style={styles.solocontainer}>
               <TouchableOpacity
@@ -57,73 +67,46 @@ let HomeScreen1 = ({ navigation }) => {
                   navigation.navigate('RecipeDetailsScreen', data);
                 }}>
                 <View style={styles.container}>
-                  {/* <View style={styles.imagecontainer}> */}
-                  <Image
-                    source={{ uri: `${baseUrlSpoonacular + item.image}` }}
+                  {/* <Image
+                    source={{uri: `${baseUrlSpoonacular + item.image}`}}
                     style={styles.image}
-                  />
-                  {/* </View>   */}
-                  <Text style={{ textAlign: 'center' }}> {item.title}</Text>
+                  /> */}
+                  <ImageBackground
+                    source={{uri: `${baseUrlSpoonacular + item.image}`}}
+                    style={styles.image}>
+                    {recipeDataInStore.map(recipeItem =>
+                      recipeItem.name === item.name ? (
+                        <View>
+                          <Icon
+                            style={{marginLeft: '90%', marginTop: '92%'}}
+                            name={'bookmark'}
+                            size={20}
+                            color={'black'}
+                          />
+                        </View>
+                      ) : null,
+                    )}
+                  </ImageBackground>
+                  <Text style={{textAlign: 'center'}}> {item.title}</Text>
                 </View>
               </TouchableOpacity>
             </View>
           );
         }}
-      // ListFooterComponent={this.renderFooter}
       />
-    </View>
-    // <View style={styles.container}>
-    //   <FlatList
-    //     data={recipes}
-    //     renderItem={({item}) => (
-    //       <TouchableOpacity
-    //         onPress={() => {
-    //           let data = {
-    //             name: item.name,
-    //             calories: item.calories,
-    //           };
-    //           navigation.navigate('RecipeDetailsScreen', data);
-    //         }}>
-    //         <View style={styles.item}>
-    //           <Text style={styles.itemText}>{item.name}</Text>
-    //           <View style={styles.itemButton}>
-    //             <Button
-    //               title="Details"
-    //               onPress={() => {
-    //                 let data = {
-    //                   name: item.name,
-    //                   calories: item.calories,
-    //                   description: item.description,
-    //                   price: item.price,
-    //                   ingrediants: item.ingrediants,
-    //                 };
-    //                 navigation.navigate('RecipeDetailsScreen', data);
-    //               }}
-    //             />
+    );
+  };
 
-    //             {recipeDataInStore.map(recipeItem =>
-    //               recipeItem.name === item.name ? (
-    //                 <View>
-    //                   <Text style={{color: 'white'}}>Saved</Text>
-    //                 </View>
-    //               ) : null,
-    //             )}
-    //           </View>
-    //         </View>
-    //       </TouchableOpacity>
-    //     )}
-    //   />
-    // </View>
-  );
+  return <View style={styles.parentBackground}>{renderFlatList()}</View>;
 };
 
 const styles = {
   solocontainer: {
     height: 'auto',
-    width: 178,
+    width: 200,
     marginTop: 5,
-    marginLeft: 3,
-    marginEnd: 1
+    marginLeft: 1,
+    marginEnd: 1,
   },
 
   container: {
@@ -135,8 +118,10 @@ const styles = {
   },
   image: {
     height: 200,
-    width: 170,
-    borderRadius: 10
+    width: 190,
+    margin: 1,
+    marginLeft: 1,
+    borderRadius: 10,
   },
   imagecontainer: {
     marginTop: 10,

@@ -1,9 +1,17 @@
-import React, { useState } from 'react';
-import { View, Text, FlatList, Button, TouchableOpacity, StyleSheet, Alert } from 'react-native';
-import { useDispatch, useSelector } from 'react-redux';
+import React, {useState} from 'react';
+import {
+  View,
+  Text,
+  FlatList,
+  Button,
+  TouchableOpacity,
+  StyleSheet,
+  Alert,
+} from 'react-native';
+import {useDispatch, useSelector} from 'react-redux';
 import * as Actions from '../store/actions/SaveAction';
 
-export default function SavedRecipeScreen1({ route }) {
+export default function SavedRecipeScreen1({route}) {
   const dispatch = useDispatch();
   const userDataInStore = useSelector(state => state.recipes);
 
@@ -11,7 +19,7 @@ export default function SavedRecipeScreen1({ route }) {
     <View style={styles.container}>
       <FlatList
         data={userDataInStore}
-        renderItem={({ item }) => (
+        renderItem={({item}) => (
           <TouchableOpacity>
             <View style={styles.item}>
               <Text style={styles.itemText}>{item.name}</Text>
@@ -20,16 +28,26 @@ export default function SavedRecipeScreen1({ route }) {
                   title="Remove"
                   color="red"
                   onPress={() => {
-                    Alert.alert("Confirmation","Are you sure?", [{
-                      text: "No", onPress: () => { }
-                    }, {
-                      text: "Yes", onPress: () => {
-                        let data = {
-                          name: item.name,
-                        };
-                        dispatch(Actions.removeRecipe(data));
-                      }
-                    }], {cancelable: true})
+                    Alert.alert(
+                      'Confirmation',
+                      'Are you sure?',
+                      [
+                        {
+                          text: 'No',
+                          onPress: () => {},
+                        },
+                        {
+                          text: 'Yes',
+                          onPress: () => {
+                            let data = {
+                              name: item.name,
+                            };
+                            dispatch(Actions.removeRecipe(data));
+                          },
+                        },
+                      ],
+                      {cancelable: true},
+                    );
                   }}
                 />
               </View>

@@ -116,11 +116,11 @@ export default function RecipeDetailsScreen1({route}) {
           height: '20%',
           display: 'flex',
           justifyContent: 'center',
-          marginTop: 150,
+          marginTop: 120,
         }}>
         <Image
           source={{uri: itemImage}}
-          style={{width: '100%', height: '100%', marginTop: 14}}
+          style={{width: '100%', height: '100%'}}
         />
       </View>
 
