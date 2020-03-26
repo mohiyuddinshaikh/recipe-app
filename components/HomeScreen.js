@@ -99,6 +99,7 @@ let HomeScreen1 = ({navigation}) => {
                     calories: '30',
                     itemId: item.id,
                     imageUrl: `${baseUrlSpoonacular + item.image}`,
+                    price: '500',
                   };
                   navigation.navigate('RecipeDetailsScreen', data);
                 }}>
