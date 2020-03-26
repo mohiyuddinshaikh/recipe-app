@@ -61,7 +61,7 @@ const HomeTabNavigator = () => {
       })}>
       {/* <Tab.Screen name="Home" component={HomeScreen} /> */}
       <Tab.Screen name="Home" component={HomeStackNavigator} />
-      <Tab.Screen name="Saved" component={SavedRecipeScreen} />
+      <Tab.Screen name="Saved" component={SavedRecipeScreen1} />
       <Tab.Screen name="Profile" component={ProfileScreen} />
     </Tab.Navigator>
   );
