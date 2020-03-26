@@ -1,26 +1,39 @@
 import React, {useState, useEffect} from 'react';
-import {View, Text, FlatList, Button, ImageBackground, Platform} from 'react-native';
+import {
+  View,
+  Text,
+  FlatList,
+  Button,
+  ImageBackground,
+  Platform,
+  Image,
+} from 'react-native';
 import {useDispatch, useSelector} from 'react-redux';
 import * as Actions from '../store/actions/SaveAction';
 import Icon from 'react-native-vector-icons/FontAwesome';
+import axios from 'axios';
+import spoonacularApiKey from '../assets/constants/SpoonacularApiKey';
 
 export default function RecipeDetailsScreen1({route}) {
   const dispatch = useDispatch();
   const recipeDataInStore = useSelector(state => state.recipes);
+  const [ingredientsFromApi, setIngredientsFromApi] = useState();
   console.log(route.params);
   console.log('route', route);
   const itemName = route.params.name;
+  const itemId = route.params.itemId;
+  const itemImage = route.params.imageUrl;
   const itemCalories = route.params.calories;
   const itemPrice = route.params.price;
   const itemDescription = route.params.description;
   const itemIngrediants = route.params.ingrediants;
   let itemImagePath = itemName.toString().toLowerCase();
-  console.log(itemImagePath)
+  console.log(itemImagePath);
   const [isRecipeSaved, setIsRecipeSaved] = useState(false);
-  
 
   useEffect(() => {
     checkIfRecipeSaved();
+    getRecipeIngredients();
   }, []);
 
   const checkIfRecipeSaved = () => {
@@ -34,11 +47,23 @@ export default function RecipeDetailsScreen1({route}) {
     }
   };
 
+  const getRecipeIngredients = async () => {
+    const response = await axios.get(
+      `https://api.spoonacular.com/recipes/${itemId}/ingredientWidget.json?apiKey=${spoonacularApiKey}`,
+    );
+    console.log(response);
+    // setIngredientsFromApi()
+  };
+
   return (
     <View style={styles.container}>
-      <ImageBackground
-        source={{uri :`asset:/images/${itemImagePath}.jpeg`}}
-        style={{width: '100%', height: '100%'}}></ImageBackground>
+      {/* <ImageBackground
+        source={{uri: `asset:/images/${itemImagePath}.jpeg`}}
+        style={{width: '100%', height: '100%'}}></ImageBackground> */}
+      <Image
+        source={{uri: itemImage}}
+        style={{width: '100%', height: '100%'}}
+      />
       <View style={styles.nameTile}>
         <Text style={styles.nameText}>{itemName}</Text>
       </View>
@@ -50,14 +75,14 @@ export default function RecipeDetailsScreen1({route}) {
           <Icon name="tachometer" color="green" size={30} />
           <Text style={{color: 'green'}}>{itemCalories}</Text>
         </View>
-        <View style={styles.iconPad}>
+        {/* <View style={styles.iconPad}>
           <Icon name="money" size={30} color="red" />
           <Text style={{color: 'red'}}>{itemPrice}</Text>
-        </View>
-        <View style={styles.iconPad}>
+        </View> */}
+        {/* <View style={styles.iconPad}>
           <Icon name="th-list" color="cyan" size={30} />
           <Text style={{color: 'cyan'}}>{itemIngrediants}</Text>
-        </View>
+        </View> */}
       </View>
       <View style={styles.saveBtn}>
         {/* <Button title="Save Recipe" color="#8326d0" style={{ borderRadius: 50 }}></Button> */}
