@@ -29,13 +29,16 @@ import {createStackNavigator} from '@react-navigation/stack';
 import {createBottomTabNavigator} from '@react-navigation/bottom-tabs';
 import * as Actions from './store/actions/SaveAction';
 import {useDispatch, useSelector} from 'react-redux';
-import {createStore} from 'redux';
+// import {createStore} from 'redux';
+import {createStore, combineReducers} from 'redux';
 import {Provider} from 'react-redux';
 import saveReducer from './store/reducer/SaveReducer';
+import setIsCallerSavedScreen from './store/reducer/MiscReducer';
 import HomeScreen1 from './components/HomeScreen';
 import SavedRecipeScreen1 from './components/SavedRecipeScreen1';
 import RecipeDetailsScreen1 from './components/RecipeDetailsScreen1';
 import Icon from 'react-native-vector-icons/FontAwesome';
+import RecipeInstructionsScreen from './components/RecipeInstructionsScreen';
 
 const Stack = createStackNavigator();
 const Tab = createBottomTabNavigator();
@@ -48,17 +51,21 @@ const HomeTabNavigator = () => {
         tabBarIcon: ({focused, color, size}) => {
           let iconName;
           if (route.name === 'Home') {
-            iconName = focused ? 'home' : 'home';
+            iconName = 'home';
           } else if (route.name === 'Saved') {
-            iconName = focused ? 'save' : 'save';
+            iconName = 'save';
           } else if (route.name === 'Profile') {
-            iconName = focused ? 'user' : 'user';
+            iconName = 'user';
           }
 
           // You can return any component that you like here!
           return <Icon name={iconName} size={size} color={color} />;
         },
-      })}>
+      })}
+      tabBarOptions={{
+        activeTintColor: '#f4511e',
+        inactiveTintColor: 'gray',
+      }}>
       {/* <Tab.Screen name="Home" component={HomeScreen} /> */}
       <Tab.Screen name="Home" component={HomeStackNavigator} />
       <Tab.Screen name="Saved" component={SavedRecipeScreen1} />
@@ -75,10 +82,38 @@ const HomeStackNavigator = ({navigation, route}) => {
   }
   return (
     <HomeStack.Navigator>
-      <HomeStack.Screen name="Home" component={HomeScreen1} />
+      <HomeStack.Screen
+        name="Home"
+        component={HomeScreen1}
+        options={{
+          title: 'Recipe App',
+          headerStyle: {
+            backgroundColor: '#f4511e',
+          },
+          headerTintColor: '#fff',
+        }}
+      />
       <HomeStack.Screen
         name="RecipeDetailsScreen"
         component={RecipeDetailsScreen1}
+        options={{
+          title: 'Recipe Details Screen',
+          headerStyle: {
+            backgroundColor: '#f4511e',
+          },
+          headerTintColor: '#fff',
+        }}
+      />
+      <HomeStack.Screen
+        name="RecipeInstructionsScreen"
+        component={RecipeInstructionsScreen}
+        options={{
+          title: 'Recipe Instruction Screen',
+          headerStyle: {
+            backgroundColor: '#f4511e',
+          },
+          headerTintColor: '#fff',
+        }}
       />
     </HomeStack.Navigator>
   );
@@ -128,7 +163,13 @@ function SavedRecipeScreen() {
 
 function ProfileScreen() {
   return (
-    <View style={{flex: 1, justifyContent: 'center', alignItems: 'center'}}>
+    <View
+      style={{
+        flex: 1,
+        justifyContent: 'center',
+        alignItems: 'center',
+        backgroundColor: '#dff9fb',
+      }}>
       <Text>My profile!</Text>
     </View>
   );
@@ -169,7 +210,13 @@ function getHeaderTitle(route) {
   }
 }
 
-const store = createStore(saveReducer);
+// const store = createStore(saveReducer);
+
+const rootReducer = combineReducers({
+  saveReducer,
+  setIsCallerSavedScreen,
+});
+const store = createStore(rootReducer);
 
 const App: () => React$Node = () => {
   return (
@@ -183,6 +230,10 @@ const App: () => React$Node = () => {
               options={({route}) => ({
                 title: getHeaderTitle(route),
                 headerShown: shouldHeaderBeShown(route),
+                headerStyle: {
+                  backgroundColor: '#f4511e',
+                },
+                headerTintColor: '#fff',
               })}
             />
             <Stack.Screen name="Saved" component={SavedRecipeScreen1} />

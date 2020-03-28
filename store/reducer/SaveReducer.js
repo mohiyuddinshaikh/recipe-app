@@ -7,6 +7,7 @@ const saveReducer = (state = initState, action) => {
   console.log(action);
 
   if (action.type === 'SAVE_RECIPE') {
+    console.log('payload ka data', action.payload);
     console.log('reducer ka state', state);
     state = {
       recipes: [...state.recipes, action.payload],

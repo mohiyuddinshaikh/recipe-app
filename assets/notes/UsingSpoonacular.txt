@@ -8,3 +8,6 @@ https://api.spoonacular.com/recipes/search?apiKey=(your apiKey)&query=biryani&nu
 2.Now fetch recipe ingredients by passing id of the recipe.
 https://api.spoonacular.com/recipes/(recipeID)/ingredientWidget.json?apiKey=baa80ca4dd1240238a3e87566c13c94f //This is with my apiKey    
 https://api.spoonacular.com/recipes/(recipeID)/ingredientWidget.json?apiKey=(your apiKey) //This is generalized query
+
+3. Fetch instructions:
+https://api.spoonacular.com/recipes/(recipeID)/analyzedInstructions?apiKey=(apikey)

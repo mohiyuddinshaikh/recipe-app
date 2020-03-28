@@ -8,36 +8,42 @@ import {
   Platform,
   Image,
   ScrollView,
+  ToastAndroid,
+  Alert,
 } from 'react-native';
 import {Colors} from 'react-native/Libraries/NewAppScreen';
 import {useDispatch, useSelector} from 'react-redux';
 import * as Actions from '../store/actions/SaveAction';
+import * as MiscActions from '../store/actions/MiscActions';
 import Icon from 'react-native-vector-icons/FontAwesome';
 import axios from 'axios';
 import spoonacularApiKey from '../assets/constants/SpoonacularApiKey';
 import {Table, Row, Rows} from 'react-native-table-component';
 import {TouchableOpacity} from 'react-native-gesture-handler';
 
-export default function RecipeDetailsScreen1({route}) {
+export default function RecipeDetailsScreen1({navigation, route}) {
   const dispatch = useDispatch();
-  const recipeDataInStore = useSelector(state => state.recipes);
+  const recipeDataInStore = useSelector(state => state.saveReducer.recipes);
+  const isCallerSavedScreen = useSelector(
+    state => state.setIsCallerSavedScreen.isCallerSavedScreen,
+  );
   const [ingredientsFromApi, setIngredientsFromApi] = useState();
   console.log(route.params);
   console.log('route', route);
   const itemName = route.params.name;
   const itemId = route.params.itemId;
   const itemImage = route.params.imageUrl;
-  const itemCalories = route.params.calories;
-  const itemPrice = route.params.price;
-  const itemDescription = route.params.description;
-  const itemIngrediants = route.params.ingrediants;
   let itemImagePath = itemName.toString().toLowerCase();
   console.log(itemImagePath);
   const [isRecipeSaved, setIsRecipeSaved] = useState(false);
 
+  console.log('isCallerSavedScreen', isCallerSavedScreen);
+
   useEffect(() => {
     checkIfRecipeSaved();
     getRecipeIngredients();
+    navigation.setOptions({title: itemName});
+    dispatch(MiscActions.setIsCallerSavedScreen(false));
   }, []);
 
   const checkIfRecipeSaved = () => {
@@ -52,11 +58,18 @@ export default function RecipeDetailsScreen1({route}) {
   };
 
   const getRecipeIngredients = async () => {
-    const response = await axios.get(
-      `https://api.spoonacular.com/recipes/${itemId}/ingredientWidget.json?apiKey=${spoonacularApiKey}`,
-    );
-    console.log(response);
-    setIngredientsFromApi(response.data.ingredients);
+    if (isCallerSavedScreen === true) {
+      console.log('CHAA GAYA');
+      const itemIngredients = route.params.ingredients;
+      setIngredientsFromApi(itemIngredients);
+    } else {
+      console.log('NAHI CHAAAYAA');
+      const response = await axios.get(
+        `https://api.spoonacular.com/recipes/${itemId}/ingredientWidget.json?apiKey=${spoonacularApiKey}`,
+      );
+      console.log(response);
+      setIngredientsFromApi(response.data.ingredients);
+    }
   };
 
   const renderIngredientTable = () => {
@@ -68,6 +81,7 @@ export default function RecipeDetailsScreen1({route}) {
             display: 'flex',
             justifyContent: 'center',
             alignItems: 'center',
+            paddingBottom: 200,
           }}>
           <View style={{width: '90%'}}>
             <Table
@@ -100,6 +114,30 @@ export default function RecipeDetailsScreen1({route}) {
     );
   };
 
+  const handleRemove = item => {
+    Alert.alert(
+      'Confirmation',
+      'Are you sure?',
+      [
+        {
+          text: 'No',
+          onPress: () => {},
+        },
+        {
+          text: 'Yes',
+          onPress: () => {
+            let data = {
+              name: itemName,
+            };
+            dispatch(Actions.removeRecipe(data));
+            setIsRecipeSaved(false);
+          },
+        },
+      ],
+      {cancelable: true},
+    );
+  };
+
   return (
     <ScrollView
       contentInsetAdjustmentBehavior="automatic"
@@ -108,7 +146,9 @@ export default function RecipeDetailsScreen1({route}) {
         display: 'flex',
         justifyContent: 'center',
         alignItems: 'center',
-        backgroundColor: '#ffeaa7',
+        // backgroundColor: '#ffeaa7',
+        backgroundColor: '#dff9fb',
+        paddingBottom: 50,
       }}>
       <View
         style={{
@@ -133,53 +173,19 @@ export default function RecipeDetailsScreen1({route}) {
         </View>
 
         <View style={styles.stats}>
-          <View style={styles.iconPad}>
-            <Icon name="tachometer" color="green" size={30} />
-            <Text style={{color: 'green'}}>{itemCalories}</Text>
-          </View>
+         
           <View style={styles.iconPad}>
             <Icon name="money" size={30} color="red" />
             <Text style={{color: 'red'}}>{itemPrice}</Text>
           </View>
         </View> */}
 
-      <View
-        style={{
-          width: '85%',
-          margin: 20,
-          display: 'flex',
-          justifyContent: 'center',
-          alignItems: 'center',
-        }}>
+      <View style={styles.buttonContainer}>
         {isRecipeSaved ? (
-          // <Button
-          //   color="red"
-          //   title="Remove this recipe from saved"
-          //   onPress={() => {
-          //     let data = {
-          //       name: itemName,
-          //     };
-          //     dispatch(Actions.removeRecipe(data));
-          //     setIsRecipeSaved(false);
-          //     alert('Recipe removed from saved tab!');
-          //   }}
-          // />
-          <View
-            style={{
-              width: '90%',
-              backgroundColor: 'red',
-              display: 'flex',
-              justifyContent: 'center',
-              alignItems: 'center',
-            }}>
+          <View style={styles.ctaButtonRemove}>
             <TouchableOpacity
               onPress={() => {
-                let data = {
-                  name: itemName,
-                };
-                dispatch(Actions.removeRecipe(data));
-                alert('Recipe removed from saved tab!');
-                setIsRecipeSaved(false);
+                handleRemove();
               }}>
               <Text style={{color: 'white', padding: 10, fontSize: 17}}>
                 Remove this recipe from saved
@@ -187,21 +193,22 @@ export default function RecipeDetailsScreen1({route}) {
             </TouchableOpacity>
           </View>
         ) : (
-          <View
-            style={{
-              width: '90%',
-              backgroundColor: '#1aff8c',
-              display: 'flex',
-              justifyContent: 'center',
-              alignItems: 'center',
-            }}>
+          <View style={styles.ctaButtonSave}>
             <TouchableOpacity
               onPress={() => {
                 let data = {
                   name: itemName,
-                  calories: itemCalories,
+                  id: itemId,
+                  imageUrl: itemImage,
+                  ingredients: ingredientsFromApi,
                 };
-                alert('Recipe saved in saved tab!');
+                ToastAndroid.showWithGravityAndOffset(
+                  'Recipe Saved !',
+                  ToastAndroid.LONG,
+                  ToastAndroid.BOTTOM,
+                  25,
+                  50,
+                );
                 setIsRecipeSaved(true);
                 dispatch(Actions.saveRecipe(data));
               }}>
@@ -210,22 +217,38 @@ export default function RecipeDetailsScreen1({route}) {
               </Text>
             </TouchableOpacity>
           </View>
-
-          // <Button
-          //   color="#1aff8c"
-          //   titleColor="black"
-          //   title="Save this Recipe"
-          //   onPress={() => {
-          //     let data = {
-          //       name: itemName,
-          //       calories: itemCalories,
-          //     };
-          //     setIsRecipeSaved(true);
-          //     dispatch(Actions.saveRecipe(data));
-          //     alert('Recipe saved in saved tab!');
-          //   }}
-          // />
         )}
+      </View>
+
+      <View
+        style={{
+          width: '85%',
+          marginBottom: 12,
+          display: 'flex',
+          justifyContent: 'center',
+          alignItems: 'center',
+        }}>
+        <View
+          style={{
+            width: '90%',
+            backgroundColor: 'black',
+            display: 'flex',
+            justifyContent: 'center',
+            alignItems: 'center',
+          }}>
+          <TouchableOpacity
+            onPress={() => {
+              let data = {
+                name: itemName,
+                id: itemId,
+              };
+              navigation.navigate('RecipeInstructionsScreen', data);
+            }}>
+            <Text style={{color: 'white', padding: 10, fontSize: 17}}>
+              Read Instructions
+            </Text>
+          </TouchableOpacity>
+        </View>
       </View>
 
       <View
@@ -301,4 +324,26 @@ const styles = {
   },
   head: {height: 40, backgroundColor: '#f1f8ff'},
   text: {margin: 6},
+  buttonContainer: {
+    width: '85%',
+    marginTop: 20,
+    marginBottom: 5,
+    display: 'flex',
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  ctaButtonRemove: {
+    width: '90%',
+    backgroundColor: 'red',
+    display: 'flex',
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  ctaButtonSave: {
+    width: '90%',
+    backgroundColor: '#1aff8c',
+    display: 'flex',
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
 };
