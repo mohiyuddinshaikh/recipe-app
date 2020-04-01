@@ -6,7 +6,7 @@
  * @flow
  */
 
-import React from 'react';
+import React, {useState, useEffect} from 'react';
 import {
   SafeAreaView,
   StyleSheet,
@@ -28,17 +28,21 @@ import {NavigationContainer} from '@react-navigation/native';
 import {createStackNavigator} from '@react-navigation/stack';
 import {createBottomTabNavigator} from '@react-navigation/bottom-tabs';
 import * as Actions from './store/actions/SaveAction';
+import * as MiscActions from './store/actions/MiscActions';
+
 import {useDispatch, useSelector} from 'react-redux';
 // import {createStore} from 'redux';
 import {createStore, combineReducers} from 'redux';
 import {Provider} from 'react-redux';
 import saveReducer from './store/reducer/SaveReducer';
-import setIsCallerSavedScreen from './store/reducer/MiscReducer';
+import miscReducer from './store/reducer/MiscReducer';
 import HomeScreen1 from './components/HomeScreen';
 import SavedRecipeScreen1 from './components/SavedRecipeScreen1';
 import RecipeDetailsScreen1 from './components/RecipeDetailsScreen1';
 import Icon from 'react-native-vector-icons/FontAwesome';
 import RecipeInstructionsScreen from './components/RecipeInstructionsScreen';
+import Signup from './components/Signup';
+import Login from './components/Login';
 
 const Stack = createStackNavigator();
 const Tab = createBottomTabNavigator();
@@ -75,46 +79,100 @@ const HomeTabNavigator = () => {
 };
 
 const HomeStackNavigator = ({navigation, route}) => {
+  const dispatch = useDispatch();
+  const isLogInFromState = useSelector(state => state.miscReducer.isLoggedIn);
+  const showLoginScreenFromState = useSelector(
+    state => state.miscReducer.showLoginScreen,
+  );
+  const [isLoggedIn, setIsLoggedIn] = useState(isLogInFromState);
+  const [showLoginScreen, setShowLoginScreen] = useState(
+    showLoginScreenFromState,
+  );
+
+  useEffect(() => {
+    setIsLoggedIn(isLogInFromState);
+  }, [isLogInFromState]);
+
+  useEffect(() => {
+    setShowLoginScreen(showLoginScreenFromState);
+  }, [showLoginScreenFromState]);
+
+  useEffect(() => {
+    dispatch(MiscActions.showLoginScreen(true));
+  }, []);
+
   if (route.state) {
     navigation.setOptions({
-      tabBarVisible: route.state.index > 0 ? false : true,
+      tabBarVisible: route.state.index > 1 ? false : true,
     });
   }
   return (
     <HomeStack.Navigator>
-      <HomeStack.Screen
-        name="Home"
-        component={HomeScreen1}
-        options={{
-          title: 'Recipe App',
-          headerStyle: {
-            backgroundColor: '#f4511e',
-          },
-          headerTintColor: '#fff',
-        }}
-      />
-      <HomeStack.Screen
-        name="RecipeDetailsScreen"
-        component={RecipeDetailsScreen1}
-        options={{
-          title: 'Recipe Details Screen',
-          headerStyle: {
-            backgroundColor: '#f4511e',
-          },
-          headerTintColor: '#fff',
-        }}
-      />
-      <HomeStack.Screen
-        name="RecipeInstructionsScreen"
-        component={RecipeInstructionsScreen}
-        options={{
-          title: 'Recipe Instruction Screen',
-          headerStyle: {
-            backgroundColor: '#f4511e',
-          },
-          headerTintColor: '#fff',
-        }}
-      />
+      {isLoggedIn ? (
+        <>
+          <HomeStack.Screen
+            name="Home"
+            component={HomeScreen1}
+            options={{
+              title: 'Recipe App',
+              headerStyle: {
+                backgroundColor: '#f4511e',
+              },
+              headerTintColor: '#fff',
+            }}
+          />
+          <HomeStack.Screen
+            name="RecipeDetailsScreen"
+            component={RecipeDetailsScreen1}
+            options={{
+              title: 'Recipe Details Screen',
+              headerStyle: {
+                backgroundColor: '#f4511e',
+              },
+              headerTintColor: '#fff',
+            }}
+          />
+          <HomeStack.Screen
+            name="RecipeInstructionsScreen"
+            component={RecipeInstructionsScreen}
+            options={{
+              title: 'Recipe Instruction Screen',
+              headerStyle: {
+                backgroundColor: '#f4511e',
+              },
+              headerTintColor: '#fff',
+            }}
+          />
+        </>
+      ) : (
+        <>
+          {showLoginScreen ? (
+            <HomeStack.Screen
+              name="Login"
+              component={Login}
+              options={{
+                title: 'Login - Recipe App',
+                headerStyle: {
+                  backgroundColor: '#f4511e',
+                },
+                headerTintColor: '#fff',
+              }}
+            />
+          ) : (
+            <HomeStack.Screen
+              name="Signup"
+              component={Signup}
+              options={{
+                title: 'Signup - Recipe App',
+                headerStyle: {
+                  backgroundColor: '#f4511e',
+                },
+                headerTintColor: '#fff',
+              }}
+            />
+          )}
+        </>
+      )}
     </HomeStack.Navigator>
   );
 };
@@ -214,7 +272,7 @@ function getHeaderTitle(route) {
 
 const rootReducer = combineReducers({
   saveReducer,
-  setIsCallerSavedScreen,
+  miscReducer,
 });
 const store = createStore(rootReducer);
 

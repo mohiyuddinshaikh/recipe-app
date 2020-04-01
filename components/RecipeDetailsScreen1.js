@@ -25,7 +25,7 @@ export default function RecipeDetailsScreen1({navigation, route}) {
   const dispatch = useDispatch();
   const recipeDataInStore = useSelector(state => state.saveReducer.recipes);
   const isCallerSavedScreen = useSelector(
-    state => state.setIsCallerSavedScreen.isCallerSavedScreen,
+    state => state.miscReducer.isCallerSavedScreen,
   );
   const [ingredientsFromApi, setIngredientsFromApi] = useState();
   console.log(route.params);
@@ -71,6 +71,20 @@ export default function RecipeDetailsScreen1({navigation, route}) {
       setIngredientsFromApi(response.data.ingredients);
     }
   };
+
+  // const translateIngredientToHindi = () => {
+  //   console.log('Inside translate');
+  //   const ingredientHindi = [...ingredientsFromApi];
+  //   ingredientHindi.map(async item => {
+  //     const response = await axios.get(
+  //       `https://translate.googleapis.com/translate_a/single?client=gtx&sl=en&tl=hi&dt=t&q=${item.name}`,
+  //     );
+  //     console.log(response);
+  //     // console.log(response.data[0]);
+  //     // item.name = response[0][0][0];
+  //   });
+  //   console.log(ingredientHindi);
+  // };
 
   const renderIngredientTable = () => {
     return (
@@ -181,6 +195,11 @@ export default function RecipeDetailsScreen1({navigation, route}) {
         </View> */}
 
       <View style={styles.buttonContainer}>
+        {/* <Button
+          onPress={() => translateIngredientToHindi()}
+          title="Translate to hindi"
+          color="#841584"
+        /> */}
         {isRecipeSaved ? (
           <View style={styles.ctaButtonRemove}>
             <TouchableOpacity
@@ -261,9 +280,7 @@ export default function RecipeDetailsScreen1({navigation, route}) {
         <Text style={{fontSize: 20, marginBottom: 20}}>
           List Of Ingredients :
         </Text>
-        {/* <ScrollView contentInsetAdjustmentBehavior="automatic"> */}
         {renderIngredientTable()}
-        {/* </ScrollView> */}
       </View>
     </ScrollView>
   );

@@ -10,8 +10,8 @@ import {
 } from 'react-native';
 import * as Actions from '../store/actions/SaveAction';
 import * as MiscActions from '../store/actions/MiscActions';
-
 import axios from 'axios';
+import firebase from '../assets/firebase/Firebase';
 import spoonacularApiKey from '../assets/constants/SpoonacularApiKey';
 import Icon from 'react-native-vector-icons/FontAwesome';
 import {useDispatch, useSelector} from 'react-redux';
@@ -21,13 +21,6 @@ let HomeScreen1 = ({navigation}) => {
   const [importedRecipes, setImportedRecipes] = useState();
   const [baseUrlSpoonacular, setBaseUrlSpoonacular] = useState();
   console.log('recipeDataInStore', recipeDataInStore);
-  const [x, setx] = useState();
-  console.log('X check kar', x);
-
-  // useEffect(() => {
-  //   console.log('BHAAAAGOOOO');
-  //   setx(recipeDataInStore);
-  // }, [recipeDataInStore]);
 
   useEffect(() => {
     console.log('I ran');
@@ -44,9 +37,7 @@ let HomeScreen1 = ({navigation}) => {
     setImportedRecipes(response.data.results);
     setBaseUrlSpoonacular(response.data.baseUri);
   };
-
   console.log('importedRecipes', importedRecipes);
-
   const dispatch = useDispatch();
 
   const renderFlatList = () => {
@@ -109,36 +100,6 @@ let HomeScreen1 = ({navigation}) => {
                         <Text style={{textAlign: 'center', color: 'white'}}>
                           {item.title}
                         </Text>
-
-                        {/* <View
-                          style={{
-                            width: '90%',
-                            display: 'flex',
-                            alignItems: 'center',
-                          }}>
-                          <Text
-                            style={{
-                              textAlign: 'center',
-                              color: 'white',
-                              fontSize: 15,
-                            }}>
-                            {item.title}
-                          </Text>
-                        </View>
-                        <View style={{width: '10%'}}>
-                          {recipeDataInStore.map(recipeItem =>
-                            recipeItem.name === item.title ? (
-                              <View>
-                                <Icon
-                                  // style={{marginLeft: '90%', marginTop: '92%'}}
-                                  name={'bookmark'}
-                                  size={20}
-                                  color={'yellow'}
-                                />
-                              </View>
-                            ) : null,
-                          )}
-                        </View> */}
                       </View>
                     </View>
                   </View>
