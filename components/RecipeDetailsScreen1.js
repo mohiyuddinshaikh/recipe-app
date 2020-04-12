@@ -15,15 +15,19 @@ import {Colors} from 'react-native/Libraries/NewAppScreen';
 import {useDispatch, useSelector} from 'react-redux';
 import * as Actions from '../store/actions/SaveAction';
 import * as MiscActions from '../store/actions/MiscActions';
+import * as UserActions from '../store/actions/UserActions';
 import Icon from 'react-native-vector-icons/FontAwesome';
 import axios from 'axios';
 import spoonacularApiKey from '../assets/constants/SpoonacularApiKey';
 import {Table, Row, Rows} from 'react-native-table-component';
 import {TouchableOpacity} from 'react-native-gesture-handler';
+import AsyncStorage from '@react-native-community/async-storage';
+import {updateUserData, removeRecipe} from '../api/user/UserOperations.api';
 
 export default function RecipeDetailsScreen1({navigation, route}) {
   const dispatch = useDispatch();
-  const recipeDataInStore = useSelector(state => state.saveReducer.recipes);
+  // const recipeDataInStore = useSelector(state => state.saveReducer.recipes);
+  const userDataInStore = useSelector(state => state.userReducer.user);
   const isCallerSavedScreen = useSelector(
     state => state.miscReducer.isCallerSavedScreen,
   );
@@ -43,15 +47,17 @@ export default function RecipeDetailsScreen1({navigation, route}) {
     checkIfRecipeSaved();
     getRecipeIngredients();
     navigation.setOptions({title: itemName});
-    dispatch(MiscActions.setIsCallerSavedScreen(false));
+    // dispatch(MiscActions.setIsCallerSavedScreen(false));
   }, []);
 
   const checkIfRecipeSaved = () => {
-    const x = recipeDataInStore.filter(item => {
-      if (item.name === itemName) {
+    console.log('userDataInStore in details screen', userDataInStore);
+    const x = userDataInStore.recipes.filter(item => {
+      if (item.recipeName === itemName) {
         return true;
       }
     });
+    console.log('x', x);
     if (x.length > 0) {
       setIsRecipeSaved(true);
     }
@@ -116,6 +122,7 @@ export default function RecipeDetailsScreen1({navigation, route}) {
                       item.name,
                       item.amount.metric.value + ' ' + item.amount.metric.unit,
                     ]}
+                    key={index}
                     style={styles.head}
                     textStyle={{margin: 6, fontSize: 15, textAlign: 'center'}}
                   />
@@ -129,6 +136,7 @@ export default function RecipeDetailsScreen1({navigation, route}) {
   };
 
   const handleRemove = item => {
+    console.log('item', item);
     Alert.alert(
       'Confirmation',
       'Are you sure?',
@@ -139,17 +147,34 @@ export default function RecipeDetailsScreen1({navigation, route}) {
         },
         {
           text: 'Yes',
-          onPress: () => {
+          onPress: async () => {
             let data = {
               name: itemName,
             };
-            dispatch(Actions.removeRecipe(data));
+            dispatch(UserActions.removeRecipe(data));
             setIsRecipeSaved(false);
+            const removeData = {
+              userId: userDataInStore._id,
+              recipeId: itemId,
+            };
+            const response = await removeRecipe(removeData);
+            console.log('response from remove recipe', response);
           },
         },
       ],
       {cancelable: true},
     );
+  };
+
+  const getInstructions = async () => {
+    const response = await axios.get(
+      `https://api.spoonacular.com/recipes/${itemId}/analyzedInstructions?apiKey=${spoonacularApiKey}`,
+    );
+    console.log('INSTRCTIONS', response);
+    if (response.status === 200) {
+      console.log('response.data[0].steps', response.data[0].steps);
+      return response.data[0].steps;
+    }
   };
 
   return (
@@ -178,22 +203,6 @@ export default function RecipeDetailsScreen1({navigation, route}) {
         />
       </View>
 
-      {/* <View style={styles.nameTile}> */}
-      {/* <Text>{itemName}</Text> */}
-      {/* </View> */}
-
-      {/* <View style={styles.description}>
-          <Text>{itemDescription}</Text>
-        </View>
-
-        <View style={styles.stats}>
-         
-          <View style={styles.iconPad}>
-            <Icon name="money" size={30} color="red" />
-            <Text style={{color: 'red'}}>{itemPrice}</Text>
-          </View>
-        </View> */}
-
       <View style={styles.buttonContainer}>
         {/* <Button
           onPress={() => translateIngredientToHindi()}
@@ -214,13 +223,13 @@ export default function RecipeDetailsScreen1({navigation, route}) {
         ) : (
           <View style={styles.ctaButtonSave}>
             <TouchableOpacity
-              onPress={() => {
-                let data = {
-                  name: itemName,
-                  id: itemId,
-                  imageUrl: itemImage,
-                  ingredients: ingredientsFromApi,
-                };
+              onPress={async () => {
+                // let data = {
+                //   name: itemName,
+                //   id: itemId,
+                //   imageUrl: itemImage,
+                //   ingredients: ingredientsFromApi,
+                // };
                 ToastAndroid.showWithGravityAndOffset(
                   'Recipe Saved !',
                   ToastAndroid.LONG,
@@ -228,8 +237,40 @@ export default function RecipeDetailsScreen1({navigation, route}) {
                   25,
                   50,
                 );
+                const dbData = {
+                  recipeId: itemId,
+                  recipeName: itemName,
+                  recipeIngredients: ingredientsFromApi,
+                  imageUrl: itemImage,
+                };
                 setIsRecipeSaved(true);
-                dispatch(Actions.saveRecipe(data));
+
+                const updateData = await updateUserData(dbData);
+                console.log('updated Data', updateData);
+
+                const instructions = await getInstructions();
+                const instructionsData = {
+                  recipeId: itemId,
+                  recipeInstructions: instructions,
+                };
+                const resInstructionsData = await updateUserData(
+                  instructionsData,
+                );
+                console.log('resInstructionsData', resInstructionsData);
+                // save in store
+                const storeData = {
+                  recipeObject: {
+                    recipeId: itemId,
+                    recipeName: itemName,
+                    recipeArray: dbData.recipeIngredients,
+                    imageUrl: itemImage,
+                  },
+                  instructionsObject: {
+                    recipeId: itemId,
+                    instructions: instructionsData.recipeInstructions,
+                  },
+                };
+                dispatch(UserActions.addRecipe(storeData));
               }}>
               <Text style={{color: 'black', padding: 10, fontSize: 17}}>
                 Save this Recipe

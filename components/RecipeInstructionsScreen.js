@@ -57,10 +57,10 @@ export default function RecipeInstructionsScreen({navigation, route}) {
       contentInsetAdjustmentBehavior="automatic"
       contentContainerStyle={{
         width: '100%',
+        minHeight: '100%',
         display: 'flex',
-        justifyContent: 'center',
+        // justifyContent: 'center',
         alignItems: 'center',
-        // backgroundColor: '#ffeaa7',
         backgroundColor: '#dff9fb',
       }}>
       <View style={{display: 'flex', alignItems: 'center'}}>

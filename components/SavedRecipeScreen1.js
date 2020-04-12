@@ -1,4 +1,4 @@
-import React, {useState} from 'react';
+import React, {useState, useEffect} from 'react';
 import {
   View,
   Text,
@@ -12,19 +12,26 @@ import {
 import {useDispatch, useSelector} from 'react-redux';
 import * as Actions from '../store/actions/SaveAction';
 import * as MiscActions from '../store/actions/MiscActions';
+import * as UserActions from '../store/actions/UserActions';
+
+import AsyncStorage from '@react-native-community/async-storage';
 
 import spoonacularApiKey from '../assets/constants/SpoonacularApiKey';
+import {removeRecipe} from '../api/user/UserOperations.api';
+import Icon from 'react-native-vector-icons/FontAwesome';
 
 export default function SavedRecipeScreen1({navigation, route}) {
   const dispatch = useDispatch();
-  const userDataInStore = useSelector(state => state.saveReducer.recipes);
+  const userDataInStore = useSelector(state => state.userReducer.user);
 
+  // const [userDataInStore, setUserDataInStore] = useState();
   console.log('userDataInStore', userDataInStore);
 
   const handleRemove = item => {
+    console.log('item', item);
     Alert.alert(
-      'Confirmation',
-      'Are you sure?',
+      'Delete Recipe',
+      `Are you sure you want to remove "${item.recipeName}" from saved recipes?`,
       [
         {
           text: 'No',
@@ -32,11 +39,14 @@ export default function SavedRecipeScreen1({navigation, route}) {
         },
         {
           text: 'Yes',
-          onPress: () => {
-            let data = {
-              name: item.name,
+          onPress: async () => {
+            const removeData = {
+              userId: userDataInStore._id,
+              recipeId: item.recipeId,
             };
-            dispatch(Actions.removeRecipe(data));
+            dispatch(UserActions.removeRecipe(removeData));
+            const response = await removeRecipe(removeData);
+            console.log('response from remove recipe', response);
           },
         },
       ],
@@ -44,15 +54,45 @@ export default function SavedRecipeScreen1({navigation, route}) {
     );
   };
 
+  // const storeData = async () => {
+  //   try {
+  //     await AsyncStorage.setItem('somekey', 'banana');
+  //     alert('Stored');
+  //   } catch (e) {
+  //     // saving error
+  //     console.log('e', e);
+  //   }
+  // };
+
+  const getData = async () => {
+    try {
+      const value2 = await AsyncStorage.getItem('jwtSecret');
+      if (value2 !== null) {
+        console.log('value2', value2);
+      }
+
+      console.log('value', value);
+      if (value !== null) {
+        // value previously stored
+        console.log('value2 is', value2);
+      }
+    } catch (e) {
+      // error reading value
+      console.log('e', e);
+    }
+  };
+
   return (
     <View style={styles.container}>
-      {userDataInStore.length < 1 ? (
+      {userDataInStore && userDataInStore.recipes.length < 1 ? (
         <View
           style={{
             display: 'flex',
             justifyContent: 'center',
             alignItems: 'center',
           }}>
+          {/* <Button title="Save in storage" onPress={() => storeData()} />
+          <Button title="Display in storage" onPress={() => getData()} /> */}
           <Image
             source={require('../assets/images/empty.jpg')}
             style={{width: '55%', height: '55%'}}
@@ -63,42 +103,50 @@ export default function SavedRecipeScreen1({navigation, route}) {
         </View>
       ) : (
         <FlatList
-          data={userDataInStore}
+          data={userDataInStore && userDataInStore.recipes}
+          extraData={userDataInStore}
           renderItem={({item}) => (
             <View
               style={{
                 flex: 1,
                 flexDirection: 'row',
-                backgroundColor: '#05386b',
+                // backgroundColor: '#b6d9fc',
                 marginTop: 2,
-                borderWidth: 2,
+                borderWidth: 1,
                 borderRadius: 5,
                 marginBottom: 5,
                 padding: 9,
               }}>
-              <View style={{width: '60%'}}>
-                <Text style={styles.itemText}>{item.name}</Text>
+              <View style={{width: '82%'}}>
+                <Text style={styles.itemText}>{item.recipeName}</Text>
               </View>
               <View
                 style={{
-                  width: '40%',
+                  width: '18%',
                   flex: 1,
                   flexDirection: 'row',
-                  alignItems: 'center',
+                  // alignItems: 'center',
+                  justifyContent: 'space-between',
                 }}>
                 <TouchableOpacity
                   activeOpacity={1}
                   onPress={() => {
                     let data = {
-                      name: item.name,
-                      itemId: item.id,
+                      // name: item.name,
+                      // itemId: item.id,
+                      // imageUrl: item.imageUrl,
+                      // ingredients: item.ingredients,
+                      name: item.recipeName,
+                      itemId: item.recipeId,
                       imageUrl: item.imageUrl,
-                      ingredients: item.ingredients,
+                      ingredients: item.recipeIngredients,
                     };
-                    dispatch(MiscActions.setIsCallerSavedScreen(true));
+                    // dispatch(MiscActions.setIsCallerSavedScreen(true));
                     navigation.navigate('RecipeDetailsScreen', data);
                   }}>
-                  <View
+                  <Icon name={'eye'} size={27} color={'#00b359'} />
+
+                  {/* <View
                     style={{
                       width: 70,
                       height: 'auto',
@@ -115,14 +163,15 @@ export default function SavedRecipeScreen1({navigation, route}) {
                       }}>
                       View
                     </Text>
-                  </View>
+                  </View> */}
                 </TouchableOpacity>
                 <TouchableOpacity
                   activeOpacity={1}
                   onPress={() => {
                     handleRemove(item);
                   }}>
-                  <View
+                  <Icon name={'trash'} size={27} color={'red'} />
+                  {/* <View
                     style={{
                       width: 70,
                       height: 'auto',
@@ -138,7 +187,7 @@ export default function SavedRecipeScreen1({navigation, route}) {
                       }}>
                       Remove
                     </Text>
-                  </View>
+                  </View> */}
                 </TouchableOpacity>
                 {/* <Text style={styles.text}>hello button</Text> */}
               </View>
@@ -175,7 +224,8 @@ const styles = StyleSheet.create({
   itemText: {
     fontSize: 20,
     marginLeft: 5,
-    color: '#edf5e1',
+    // color: '#edf5e1',
+    color: 'black',
     // paddingTop: 3,
   },
 });

@@ -15,6 +15,7 @@ import {
   Text,
   StatusBar,
   Button,
+  Alert,
 } from 'react-native';
 
 import {
@@ -36,6 +37,7 @@ import {createStore, combineReducers} from 'redux';
 import {Provider} from 'react-redux';
 import saveReducer from './store/reducer/SaveReducer';
 import miscReducer from './store/reducer/MiscReducer';
+import userReducer from './store/reducer/UserReducer';
 import HomeScreen1 from './components/HomeScreen';
 import SavedRecipeScreen1 from './components/SavedRecipeScreen1';
 import RecipeDetailsScreen1 from './components/RecipeDetailsScreen1';
@@ -43,6 +45,9 @@ import Icon from 'react-native-vector-icons/FontAwesome';
 import RecipeInstructionsScreen from './components/RecipeInstructionsScreen';
 import Signup from './components/Signup';
 import Login from './components/Login';
+import ProfileScreen1 from './components/ProfileScreen1';
+import AsyncStorage from '@react-native-community/async-storage';
+import Logout from './components/Logout';
 
 const Stack = createStackNavigator();
 const Tab = createBottomTabNavigator();
@@ -51,13 +56,16 @@ const HomeStack = createStackNavigator();
 const HomeTabNavigator = () => {
   return (
     <Tab.Navigator
+      initialRouteName="Home"
       screenOptions={({route}) => ({
         tabBarIcon: ({focused, color, size}) => {
+          // console.log('Upar vaale ka route', route);
+
           let iconName;
           if (route.name === 'Home') {
             iconName = 'home';
           } else if (route.name === 'Saved') {
-            iconName = 'save';
+            iconName = 'bookmark';
           } else if (route.name === 'Profile') {
             iconName = 'user';
           }
@@ -65,15 +73,17 @@ const HomeTabNavigator = () => {
           // You can return any component that you like here!
           return <Icon name={iconName} size={size} color={color} />;
         },
+        tabBarVisible: route.name === 'Home' ? false : true,
       })}
       tabBarOptions={{
         activeTintColor: '#f4511e',
         inactiveTintColor: 'gray',
       }}>
       {/* <Tab.Screen name="Home" component={HomeScreen} /> */}
-      <Tab.Screen name="Home" component={HomeStackNavigator} />
       <Tab.Screen name="Saved" component={SavedRecipeScreen1} />
-      <Tab.Screen name="Profile" component={ProfileScreen} />
+
+      <Tab.Screen name="Home" component={HomeStackNavigator} />
+      <Tab.Screen name="Profile" component={ProfileScreen1} />
     </Tab.Navigator>
   );
 };
@@ -102,10 +112,22 @@ const HomeStackNavigator = ({navigation, route}) => {
   }, []);
 
   if (route.state) {
+    console.log('route', route);
+    console.log('route.state.index', route.state.index);
+    let routeName = route.state.routes[0].name;
+    console.log('ROUTE NAME', routeName);
     navigation.setOptions({
-      tabBarVisible: route.state.index > 1 ? false : true,
+      tabBarVisible:
+        routeName === 'Login' || routeName === 'Signup' || route.state.index > 1
+          ? false
+          : true,
     });
   }
+
+  const xscreen = () => {
+    return <Text>X-screen</Text>;
+  };
+
   return (
     <HomeStack.Navigator>
       {isLoggedIn ? (
@@ -151,7 +173,7 @@ const HomeStackNavigator = ({navigation, route}) => {
               name="Login"
               component={Login}
               options={{
-                title: 'Login - Recipe App',
+                title: 'Recipe App - Login',
                 headerStyle: {
                   backgroundColor: '#f4511e',
                 },
@@ -163,7 +185,7 @@ const HomeStackNavigator = ({navigation, route}) => {
               name="Signup"
               component={Signup}
               options={{
-                title: 'Signup - Recipe App',
+                title: 'Recipe App - Signup',
                 headerStyle: {
                   backgroundColor: '#f4511e',
                 },
@@ -271,12 +293,55 @@ function getHeaderTitle(route) {
 // const store = createStore(saveReducer);
 
 const rootReducer = combineReducers({
+  userReducer,
   saveReducer,
   miscReducer,
 });
 const store = createStore(rootReducer);
 
+const showHeaderRightContent = (route, navigation) => {
+  const routeName = route.state
+    ? route.state.routes[route.state.index].name
+    : 'Home';
+  switch (routeName) {
+    case 'Home':
+      return null;
+    case 'Saved':
+      return null;
+    case 'Profile':
+      return (
+        <View style={{marginRight: 18}}>
+          <Text
+            style={{color: 'white', fontSize: 16}}
+            onPress={() =>
+              Alert.alert(
+                'Log out',
+                'Are you sure you want to log out?',
+                [
+                  {
+                    text: 'No',
+                    onPress: () => {},
+                  },
+                  {
+                    text: 'Yes',
+                    onPress: () => {
+                      navigation.navigate('Logout');
+                    },
+                  },
+                ],
+                {cancelable: true},
+              )
+            }>
+            Log out
+          </Text>
+        </View>
+      );
+  }
+};
+
 const App: () => React$Node = () => {
+  // const isLoggedIn = useSelector(state => state.miscReducer.isLoggedIn);
+  // console.log('isLoggedIn', isLoggedIn);
   return (
     <>
       <Provider store={store}>
@@ -285,8 +350,10 @@ const App: () => React$Node = () => {
             <Stack.Screen
               name="home"
               component={HomeTabNavigator}
-              options={({route}) => ({
+              options={({route, navigation}) => ({
                 title: getHeaderTitle(route),
+                headerRight: () => showHeaderRightContent(route, navigation),
+                headerRightTintColor: '#fff',
                 headerShown: shouldHeaderBeShown(route),
                 headerStyle: {
                   backgroundColor: '#f4511e',
@@ -295,7 +362,8 @@ const App: () => React$Node = () => {
               })}
             />
             <Stack.Screen name="Saved" component={SavedRecipeScreen1} />
-            <Stack.Screen name="Profile" component={ProfileScreen} />
+            <Stack.Screen name="Profile" component={ProfileScreen1} />
+            <Stack.Screen name="Logout" component={Logout} />
           </Stack.Navigator>
         </NavigationContainer>
       </Provider>

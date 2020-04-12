@@ -7,23 +7,29 @@ import {
   TouchableOpacity,
   Image,
   ImageBackground,
+  ActivityIndicator,
 } from 'react-native';
 import * as Actions from '../store/actions/SaveAction';
 import * as MiscActions from '../store/actions/MiscActions';
+import * as UserActions from '../store/actions/UserActions';
+
 import axios from 'axios';
 import firebase from '../assets/firebase/Firebase';
 import spoonacularApiKey from '../assets/constants/SpoonacularApiKey';
 import Icon from 'react-native-vector-icons/FontAwesome';
 import {useDispatch, useSelector} from 'react-redux';
+import {getUserData} from '../api/user/UserOperations.api';
 
 let HomeScreen1 = ({navigation}) => {
-  const recipeDataInStore = useSelector(state => state.saveReducer.recipes);
-  const [importedRecipes, setImportedRecipes] = useState();
+  // const dataConnector = useSelector(state => state.userReducer.user);
+  // const [userDataInStore, setUserDataInStore] = useState();
+  const userDataInStore = useSelector(state => state.userReducer.user);
+  const [importedRecipes, setImportedRecipes] = useState(null);
   const [baseUrlSpoonacular, setBaseUrlSpoonacular] = useState();
-  console.log('recipeDataInStore', recipeDataInStore);
 
   useEffect(() => {
     console.log('I ran');
+    fetchUserData();
     getRecipeFromApi();
   }, []);
 
@@ -40,74 +46,104 @@ let HomeScreen1 = ({navigation}) => {
   console.log('importedRecipes', importedRecipes);
   const dispatch = useDispatch();
 
+  const fetchUserData = async () => {
+    const response = await getUserData();
+    console.log('response', response);
+    if (response.status === 200) {
+      console.log('User data fetch succesful');
+      // Update store
+      dispatch(UserActions.updateUser(response.data));
+      // setUserDataInStore(response.data);
+    }
+  };
+  console.log('User data in store', userDataInStore);
+
   const renderFlatList = () => {
     return (
       <View style={{width: '98%'}}>
-        <FlatList
-          data={importedRecipes}
-          keyExtractor={item => item.id}
-          numColumns={2}
-          extraData={recipeDataInStore}
-          renderItem={({item, index}) => {
-            return (
-              <View style={styles.solocontainer}>
-                <TouchableOpacity
-                  onPress={() => {
-                    let data = {
-                      name: item.title,
-                      itemId: item.id,
-                      imageUrl: `${baseUrlSpoonacular + item.image}`,
-                      price: '500',
-                    };
-                    navigation.navigate('RecipeDetailsScreen', data);
-                  }}>
-                  <View style={styles.container}>
-                    <ImageBackground
-                      source={{uri: `${baseUrlSpoonacular + item.image}`}}
-                      style={styles.image}
-                      imageStyle={{borderRadius: 15}}>
-                      {recipeDataInStore.map(recipeItem =>
-                        recipeItem.name === item.title ? (
-                          <View>
-                            <Icon
-                              style={{marginLeft: '88%', marginTop: '3%'}}
-                              // style={{marginLeft: '90%'}}
-                              name={'bookmark'}
-                              size={20}
-                              color={'yellow'}
-                            />
-                          </View>
-                        ) : null,
-                      )}
-                    </ImageBackground>
-                    <View
-                      style={{
-                        height: 'auto',
-                        backgroundColor: 'black',
-                        display: 'flex',
-                        justifyContent: 'center',
-                        borderRadius: 5,
-                      }}>
+        {importedRecipes === null ? (
+          <View
+            style={{
+              height: '100%',
+              width: '100%',
+              display: 'flex',
+              justifyContent: 'center',
+              alignItems: 'center',
+            }}>
+            <Text style={{fontSize: 15, marginBottom: 10}}>
+              Loading Deliciousness
+            </Text>
+            <ActivityIndicator size="large" color="#0000ff" />
+          </View>
+        ) : (
+          <FlatList
+            data={importedRecipes}
+            keyExtractor={item => item.id}
+            numColumns={2}
+            // extraData={userDataInStore.recipes}
+            renderItem={({item, index}) => {
+              return (
+                <View style={styles.solocontainer}>
+                  <TouchableOpacity
+                    activeOpacity={1}
+                    onPress={() => {
+                      let data = {
+                        name: item.title,
+                        itemId: item.id,
+                        imageUrl: `${baseUrlSpoonacular + item.image}`,
+                        price: '500',
+                      };
+                      navigation.navigate('RecipeDetailsScreen', data);
+                      // navigation.navigate('xscreen');
+                    }}>
+                    <View style={styles.container}>
+                      <ImageBackground
+                        source={{uri: `${baseUrlSpoonacular + item.image}`}}
+                        style={styles.image}
+                        imageStyle={{borderRadius: 15}}>
+                        {userDataInStore.recipes.map(recipeItem =>
+                          recipeItem.recipeName === item.title ? (
+                            <View>
+                              <Icon
+                                style={{marginLeft: '88%', marginTop: '3%'}}
+                                // style={{marginLeft: '90%'}}
+                                name={'bookmark'}
+                                size={20}
+                                color={'yellow'}
+                              />
+                            </View>
+                          ) : null,
+                        )}
+                      </ImageBackground>
                       <View
                         style={{
-                          width: '95%',
-                          padding: 5,
-                          flex: 1,
-                          flexDirection: 'row',
+                          height: 'auto',
+                          backgroundColor: 'black',
                           display: 'flex',
                           justifyContent: 'center',
+                          borderRadius: 5,
                         }}>
-                        <Text style={{textAlign: 'center', color: 'white'}}>
-                          {item.title}
-                        </Text>
+                        <View
+                          style={{
+                            width: '95%',
+                            padding: 5,
+                            flex: 1,
+                            flexDirection: 'row',
+                            display: 'flex',
+                            justifyContent: 'center',
+                          }}>
+                          <Text style={{textAlign: 'center', color: 'white'}}>
+                            {item.title}
+                          </Text>
+                        </View>
                       </View>
                     </View>
-                  </View>
-                </TouchableOpacity>
-              </View>
-            );
-          }}
-        />
+                  </TouchableOpacity>
+                </View>
+              );
+            }}
+          />
+        )}
       </View>
     );
   };
