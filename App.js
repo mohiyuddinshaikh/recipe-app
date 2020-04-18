@@ -118,7 +118,9 @@ const HomeStackNavigator = ({navigation, route}) => {
     console.log('ROUTE NAME', routeName);
     navigation.setOptions({
       tabBarVisible:
-        routeName === 'Login' || routeName === 'Signup' || route.state.index > 1
+        routeName === 'Login' ||
+        routeName === 'Signup' ||
+        (routeName === 'RecipeDetailsScreen' && route.state.index > 1)
           ? false
           : true,
     });

@@ -7,8 +7,8 @@ const userReducer = (state = initState, action) => {
   console.log('INSIDE USERRRR REDUCER');
 
   if (action.type === 'GET_USER') {
-    console.log('payload ka data', action.payload);
     console.log('reducer ka state', state);
+    state = {...state};
     return state;
   }
 
@@ -47,6 +47,7 @@ const userReducer = (state = initState, action) => {
 
     state = {
       user: {
+        ...state.user,
         recipes: removeIngredientsArray,
         instructions: removeInstructionsArray,
       },

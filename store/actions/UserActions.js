@@ -4,6 +4,7 @@ const REMOVE_RECIPE = 'REMOVE_RECIPE';
 const ADD_RECIPE = 'ADD_RECIPE';
 
 export function getUser() {
+  console.log('Inside get user action');
   return {
     type: GET_USER,
     // payload: data,

@@ -23,11 +23,12 @@ import {Table, Row, Rows} from 'react-native-table-component';
 import {TouchableOpacity} from 'react-native-gesture-handler';
 import AsyncStorage from '@react-native-community/async-storage';
 import {updateUserData, removeRecipe} from '../api/user/UserOperations.api';
+import {useIsFocused} from '@react-navigation/native';
 
 export default function RecipeDetailsScreen1({navigation, route}) {
   const dispatch = useDispatch();
   // const recipeDataInStore = useSelector(state => state.saveReducer.recipes);
-  const userDataInStore = useSelector(state => state.userReducer.user);
+  let userDataInStore = useSelector(state => state.userReducer.user);
   const isCallerSavedScreen = useSelector(
     state => state.miscReducer.isCallerSavedScreen,
   );
@@ -40,10 +41,24 @@ export default function RecipeDetailsScreen1({navigation, route}) {
   let itemImagePath = itemName.toString().toLowerCase();
   console.log(itemImagePath);
   const [isRecipeSaved, setIsRecipeSaved] = useState(false);
+  // const [focusCount, setFocusCount] = useState(0);
 
   console.log('isCallerSavedScreen', isCallerSavedScreen);
+  // const isFocused = useIsFocused();
+
+  // if (isFocused) {
+  //   console.log('userDataInStore focus', userDataInStore);
+  //   userDataInStore.recipes.map(item => {
+  //     if (itemId === item.recipeId) {
+  //       setIsRecipeSaved(true);
+  //     } else {
+  //       setIsRecipeSaved(false);
+  //     }
+  //   });
+  // }
 
   useEffect(() => {
+    console.log('Use effect ran');
     checkIfRecipeSaved();
     getRecipeIngredients();
     navigation.setOptions({title: itemName});

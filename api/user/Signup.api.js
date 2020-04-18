@@ -28,6 +28,7 @@ export const loginApi = async data => {
       'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjVlODQ0NWI1ZWJmMjQ2MTQyOGNhMDRmMiIsImlhdCI6MTU4NTcyODk1NCwiZXhwIjoxNTg1NzcyMTU0fQ.J72CcvmDewpaG9X0YxHFMJ7bfDOfLKTB5dU3qFqwbOM';
     console.log(data);
     const url = `${baseUrl}/login`;
+    console.log('url', url);
     console.log(QueryString.stringify(data));
     const response = await axios.post(url, QueryString.stringify(data));
 
