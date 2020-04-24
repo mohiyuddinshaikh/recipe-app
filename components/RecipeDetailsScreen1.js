@@ -62,6 +62,7 @@ export default function RecipeDetailsScreen1({navigation, route}) {
     checkIfRecipeSaved();
     getRecipeIngredients();
     navigation.setOptions({title: itemName});
+    dispatch(MiscActions.showSearchBar(false));
     // dispatch(MiscActions.setIsCallerSavedScreen(false));
   }, []);
 

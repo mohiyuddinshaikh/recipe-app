@@ -79,9 +79,7 @@ const HomeTabNavigator = () => {
         activeTintColor: '#f4511e',
         inactiveTintColor: 'gray',
       }}>
-      {/* <Tab.Screen name="Home" component={HomeScreen} /> */}
       <Tab.Screen name="Saved" component={SavedRecipeScreen1} />
-
       <Tab.Screen name="Home" component={HomeStackNavigator} />
       <Tab.Screen name="Profile" component={ProfileScreen1} />
     </Tab.Navigator>
@@ -94,6 +92,8 @@ const HomeStackNavigator = ({navigation, route}) => {
   const showLoginScreenFromState = useSelector(
     state => state.miscReducer.showLoginScreen,
   );
+  const showSearchBar = useSelector(state => state.miscReducer.showSearchBar);
+
   const [isLoggedIn, setIsLoggedIn] = useState(isLogInFromState);
   const [showLoginScreen, setShowLoginScreen] = useState(
     showLoginScreenFromState,
@@ -143,6 +143,32 @@ const HomeStackNavigator = ({navigation, route}) => {
                 backgroundColor: '#f4511e',
               },
               headerTintColor: '#fff',
+              headerShown: true,
+              headerRight: () => (
+                <View style={{marginRight: 18}}>
+                  {showSearchBar ? (
+                    <Icon
+                      name={'close'}
+                      size={18}
+                      color={'white'}
+                      onPress={() => {
+                        console.log('Seacrh pressed');
+                        dispatch(MiscActions.showSearchBar(false));
+                      }}
+                    />
+                  ) : (
+                    <Icon
+                      name={'search'}
+                      size={18}
+                      color={'white'}
+                      onPress={() => {
+                        console.log('Seacrh pressed');
+                        dispatch(MiscActions.showSearchBar(true));
+                      }}
+                    />
+                  )}
+                </View>
+              ),
             }}
           />
           <HomeStack.Screen

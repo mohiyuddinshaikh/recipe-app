@@ -15,19 +15,20 @@ import * as MiscActions from '../store/actions/MiscActions';
 import * as UserActions from '../store/actions/UserActions';
 
 import axios from 'axios';
-import firebase from '../assets/firebase/Firebase';
 import spoonacularApiKey from '../assets/constants/SpoonacularApiKey';
 import Icon from 'react-native-vector-icons/FontAwesome';
+import Octicon from 'react-native-vector-icons/Octicons';
+
 import {useDispatch, useSelector} from 'react-redux';
 import {getUserData} from '../api/user/UserOperations.api';
 
 let HomeScreen1 = ({navigation, route}) => {
-  // const dataConnector = useSelector(state => state.userReducer.user);
-  // const [userDataInStore, setUserDataInStore] = useState();
   const userDataInStore = useSelector(state => state.userReducer.user);
+  const showSearchBar = useSelector(state => state.miscReducer.showSearchBar);
+
   const [importedRecipes, setImportedRecipes] = useState(null);
   const [baseUrlSpoonacular, setBaseUrlSpoonacular] = useState();
-  const [searchText, setSearchText] = useState(null);
+  const [searchText, setSearchText] = useState('');
   console.log('route in homescreen', route);
 
   useEffect(() => {
@@ -64,7 +65,7 @@ let HomeScreen1 = ({navigation, route}) => {
   const renderFlatList = () => {
     return (
       <View style={{width: '98%'}}>
-        {importedRecipes === null ? (
+        {importedRecipes === null || userDataInStore === null ? (
           <View
             style={{
               height: '100%',
@@ -74,17 +75,16 @@ let HomeScreen1 = ({navigation, route}) => {
               alignItems: 'center',
             }}>
             <Text style={{fontSize: 15, marginBottom: 10}}>
-              Loading Deliciousness
+              Loading Delicacies
             </Text>
             <ActivityIndicator size="large" color="#0000ff" />
           </View>
         ) : (
-          <View style={{height: 'auto', paddingBottom: 130}}>
+          <View style={{paddingBottom: showSearchBar ? 190 : null}}>
             <FlatList
               data={importedRecipes}
               keyExtractor={item => item.id}
               numColumns={2}
-              // extraData={userDataInStore.recipes}
               renderItem={({item, index}) => {
                 return (
                   <View style={styles.solocontainer}>
@@ -98,34 +98,38 @@ let HomeScreen1 = ({navigation, route}) => {
                           price: '500',
                         };
                         navigation.navigate('RecipeDetailsScreen', data);
-                        // navigation.navigate('xscreen');
+                        setFilteredRecipes(null);
+                        setSearchText('');
                       }}>
                       <View style={styles.container}>
                         <ImageBackground
                           source={{uri: `${baseUrlSpoonacular + item.image}`}}
                           style={styles.image}
-                          imageStyle={{borderRadius: 15}}>
-                          {userDataInStore.recipes.map(recipeItem =>
-                            recipeItem.recipeName === item.title ? (
-                              <View>
-                                <Icon
-                                  style={{marginLeft: '88%', marginTop: '3%'}}
-                                  // style={{marginLeft: '90%'}}
-                                  name={'bookmark'}
-                                  size={20}
-                                  color={'yellow'}
-                                />
-                              </View>
-                            ) : null,
-                          )}
+                          // imageStyle={{borderRadius: 15}}
+                        >
+                          {userDataInStore &&
+                            userDataInStore.recipes.map(recipeItem =>
+                              recipeItem.recipeName === item.title ? (
+                                <View>
+                                  <Icon
+                                    style={{marginLeft: '5%', marginTop: '91%'}}
+                                    // style={{marginLeft: '90%'}}
+                                    name={'bookmark'}
+                                    size={20}
+                                    color={'#f4511e'}
+                                  />
+                                </View>
+                              ) : null,
+                            )}
                         </ImageBackground>
                         <View
                           style={{
                             height: 'auto',
-                            backgroundColor: 'black',
+                            backgroundColor: 'white',
                             display: 'flex',
                             justifyContent: 'center',
-                            borderRadius: 5,
+
+                            // borderRadius: 5,
                           }}>
                           <View
                             style={{
@@ -136,7 +140,13 @@ let HomeScreen1 = ({navigation, route}) => {
                               display: 'flex',
                               justifyContent: 'center',
                             }}>
-                            <Text style={{textAlign: 'center', color: 'white'}}>
+                            <Text
+                              style={{
+                                textAlign: 'center',
+                                color: 'black',
+                                fontSize: 16,
+                                fontWeight: '100',
+                              }}>
                               {item.title}
                             </Text>
                           </View>
@@ -153,49 +163,27 @@ let HomeScreen1 = ({navigation, route}) => {
     );
   };
 
-  const [filteredRecipes, setFilteredRecipes] = useState([]);
-  // useEffect(() => {
-  //   renderSearchResults();
-  // }, [filteredRecipes]);
-
-  const findRecipe = text => {
-    console.log('text', text);
-    let arr = [];
-    importedRecipes.filter(item => {
-      if (item.title.toLowerCase().includes(text)) {
-        console.log('item.title', item.title);
-        console.log('item', item);
-        arr.push(item);
-      }
-    });
-    console.log('arr', arr);
-    setFilteredRecipes([...arr]);
-  };
-  console.log('filteredRecipesState', filteredRecipes);
-
-  const [x, setx] = useState([]);
-
-  return (
-    <View style={styles.parentBackground}>
-      {/* <Text onPress={() => setx([...x, '1'])}>CLick me</Text> */}
+  const renderSearchBar = () => {
+    return (
       <View
         style={{
-          width: '95%',
+          width: '94%',
           flexDirection: 'row',
           paddingBottom: 10,
           display: 'flex',
+          flexWrap: 'wrap',
+          justifyContent: 'center',
         }}>
         <View style={styles.searchBox}>
           <TextInput
-            // style={styles.searchBox}
             placeholder="Search Recipe"
-            onChangeText={text => {
-              setSearchText(text);
-              findRecipe(searchText.toLowerCase());
+            onChangeText={async text => {
+              await setSearchText(text);
+              findRecipe(text.toLowerCase());
             }}
             value={searchText}
           />
-          {searchText !== null || searchText != '' ? (
+          {(searchText && searchText !== null) || searchText != '' ? (
             <Icon
               name={'close'}
               size={15}
@@ -203,6 +191,7 @@ let HomeScreen1 = ({navigation, route}) => {
               style={{marginRight: 10}}
               onPress={() => {
                 setSearchText('');
+                setFilteredRecipes(null);
               }}
             />
           ) : null}
@@ -211,7 +200,7 @@ let HomeScreen1 = ({navigation, route}) => {
         <View
           style={{
             height: 45,
-            width: '9%',
+            width: '8%',
             marginTop: 10,
             borderRadius: 5,
             display: 'flex',
@@ -221,30 +210,70 @@ let HomeScreen1 = ({navigation, route}) => {
           }}>
           <Icon
             name={'search'}
-            size={23}
+            size={22}
             color={'#111'}
-            // onPress={() => searchRecipe(searchText)}
             onPress={() => findRecipe(searchText.toLowerCase())}
           />
         </View>
+        <View
+          style={{
+            height: 45,
+            width: '9%',
+            marginTop: 10,
+            borderRadius: 5,
+            display: 'flex',
+            justifyContent: 'center',
+            alignItems: 'center',
+            // marginLeft: '1%',
+          }}>
+          <Octicon
+            name={'settings'}
+            size={24}
+            color={'black'}
+            onPress={() => findRecipe(searchText.toLowerCase())}
+          />
+        </View>
+        <View>
+          <Icon
+            name={'close'}
+            size={18}
+            color={'black'}
+            style={{marginTop: 10}}
+            onPress={() => {
+              dispatch(MiscActions.showSearchBar(false));
+            }}
+          />
+        </View>
       </View>
-      {/* {renderSearchResults()} */}
+    );
+  };
 
-      {/* {x &&
-        x.length > 0 &&
-        x.map((item, index) => {
-          return (
-            <View
-              style={{
-                width: '90%',
-                backgroundColor: 'white',
-                color: 'black',
-                height: 40,
-              }}>
-              <Text> Recipe {index + 1}</Text>
-            </View>
-          );
-        })} */}
+  const [filteredRecipes, setFilteredRecipes] = useState([]);
+
+  const findRecipe = text => {
+    console.log('text', text);
+    let arr = [];
+    if (text != '') {
+      importedRecipes.filter(item => {
+        if (item.title.toLowerCase().includes(text)) {
+          console.log('item.title', item.title);
+          console.log('item', item);
+          arr.push(item);
+        }
+      });
+      console.log('arr', arr);
+      setFilteredRecipes([...arr]);
+    } else {
+      setFilteredRecipes(null);
+    }
+  };
+  console.log('filteredRecipesState', filteredRecipes);
+
+  const [x, setx] = useState([]);
+
+  return (
+    <View style={styles.parentBackground}>
+      {showSearchBar ? renderSearchBar() : null}
 
       {filteredRecipes &&
         filteredRecipes.length > 0 &&
@@ -309,8 +338,8 @@ const styles = {
     marginTop: 10,
   },
   parentBackground: {
-    // backgroundColor: '#ffeaa7',
     backgroundColor: '#dff9fb',
+    // backgroundColor: '#9c88ff',
     display: 'flex',
     alignItems: 'center',
   },
@@ -318,8 +347,7 @@ const styles = {
     height: 45,
     borderColor: 'gray',
     borderWidth: 1,
-    width: '91%',
-    // width: '99%',
+    width: '82%',
     marginTop: 10,
     borderRadius: 5,
     flexDirection: 'row',

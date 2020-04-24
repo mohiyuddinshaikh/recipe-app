@@ -2,6 +2,7 @@ const initState = {
   isCallerSavedScreen: false,
   isLoggedIn: false,
   showLoginScreen: true,
+  showSearchBar: false,
 };
 
 const miscReducer = (state = initState, action) => {
@@ -33,6 +34,16 @@ const miscReducer = (state = initState, action) => {
     state = {
       ...state,
       showLoginScreen: action.payload,
+    };
+    console.log('reducer state after saving', state);
+    return state;
+  }
+
+  if (action.type === 'SHOW_SEARCH_BAR') {
+    console.log('reducer ka state', state);
+    state = {
+      ...state,
+      showSearchBar: action.payload,
     };
     console.log('reducer state after saving', state);
     return state;
