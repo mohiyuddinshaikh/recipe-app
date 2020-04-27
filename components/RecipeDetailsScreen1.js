@@ -33,11 +33,13 @@ export default function RecipeDetailsScreen1({navigation, route}) {
     state => state.miscReducer.isCallerSavedScreen,
   );
   const [ingredientsFromApi, setIngredientsFromApi] = useState();
+  const [recipeDetailInformation, setRecipeDetailInformation] = useState();
   console.log(route.params);
   console.log('route', route);
   const itemName = route.params.name;
   const itemId = route.params.itemId;
   const itemImage = route.params.imageUrl;
+  console.log('itemImage :>> ', itemImage);
   let itemImagePath = itemName.toString().toLowerCase();
   console.log(itemImagePath);
   const [isRecipeSaved, setIsRecipeSaved] = useState(false);
@@ -61,6 +63,7 @@ export default function RecipeDetailsScreen1({navigation, route}) {
     console.log('Use effect ran');
     checkIfRecipeSaved();
     getRecipeIngredients();
+    getDetailedRecipeInformation();
     navigation.setOptions({title: itemName});
     dispatch(MiscActions.showSearchBar(false));
     // dispatch(MiscActions.setIsCallerSavedScreen(false));
@@ -92,6 +95,14 @@ export default function RecipeDetailsScreen1({navigation, route}) {
       console.log(response);
       setIngredientsFromApi(response.data.ingredients);
     }
+  };
+
+  const getDetailedRecipeInformation = async () => {
+    const response = await axios.get(
+      `https://api.spoonacular.com/recipes/${itemId}/information?apiKey=${spoonacularApiKey}`,
+    );
+    console.log(response);
+    setRecipeDetailInformation(response.data);
   };
 
   // const translateIngredientToHindi = () => {
@@ -193,6 +204,8 @@ export default function RecipeDetailsScreen1({navigation, route}) {
     }
   };
 
+  console.log('recipeDetailInformation :>> ', recipeDetailInformation);
+
   return (
     <ScrollView
       contentInsetAdjustmentBehavior="automatic"
@@ -214,7 +227,12 @@ export default function RecipeDetailsScreen1({navigation, route}) {
           marginTop: 120,
         }}>
         <Image
-          source={{uri: itemImage}}
+          source={{
+            uri:
+              itemImage != undefined
+                ? itemImage
+                : recipeDetailInformation && recipeDetailInformation.image,
+          }}
           style={{width: '100%', height: '100%'}}
         />
       </View>
@@ -226,8 +244,9 @@ export default function RecipeDetailsScreen1({navigation, route}) {
           color="#841584"
         /> */}
         {isRecipeSaved ? (
-          <View style={styles.ctaButtonRemove}>
+          <View>
             <TouchableOpacity
+              style={styles.ctaButtonRemove}
               onPress={() => {
                 handleRemove();
               }}>
@@ -237,15 +256,66 @@ export default function RecipeDetailsScreen1({navigation, route}) {
             </TouchableOpacity>
           </View>
         ) : (
-          <View style={styles.ctaButtonSave}>
+          <View
+            style={{
+              width: '90%',
+            }}>
             <TouchableOpacity
               onPress={async () => {
-                // let data = {
-                //   name: itemName,
-                //   id: itemId,
-                //   imageUrl: itemImage,
-                //   ingredients: ingredientsFromApi,
-                // };
+                ToastAndroid.showWithGravityAndOffset(
+                  'Recipe Saved !',
+                  ToastAndroid.LONG,
+                  ToastAndroid.BOTTOM,
+                  25,
+                  50,
+                );
+                const dbData = {
+                  recipeId: itemId,
+                  recipeName: itemName,
+                  recipeIngredients: ingredientsFromApi,
+                  imageUrl: itemImage,
+                };
+                setIsRecipeSaved(true);
+
+                const updateData = await updateUserData(dbData);
+                console.log('updated Data', updateData);
+
+                const instructions = await getInstructions();
+                const instructionsData = {
+                  recipeId: itemId,
+                  recipeInstructions: instructions,
+                };
+                const resInstructionsData = await updateUserData(
+                  instructionsData,
+                );
+                console.log('resInstructionsData', resInstructionsData);
+                // save in store
+                const storeData = {
+                  recipeObject: {
+                    recipeId: itemId,
+                    recipeName: itemName,
+                    recipeArray: dbData.recipeIngredients,
+                    imageUrl: itemImage,
+                  },
+                  instructionsObject: {
+                    recipeId: itemId,
+                    instructions: instructionsData.recipeInstructions,
+                  },
+                };
+                dispatch(UserActions.addRecipe(storeData));
+              }}
+              style={{
+                width: '100%',
+                backgroundColor: '#1aff8c',
+                paddingVertical: 10,
+              }}>
+              <Text style={{textAlign: 'center', color: 'black', fontSize: 17}}>
+                Save this Recipe
+              </Text>
+            </TouchableOpacity>
+            {/* <TouchableOpacity
+              style={{width: '100%'}} 
+              onPress={async () => {
                 ToastAndroid.showWithGravityAndOffset(
                   'Recipe Saved !',
                   ToastAndroid.LONG,
@@ -291,7 +361,7 @@ export default function RecipeDetailsScreen1({navigation, route}) {
               <Text style={{color: 'black', padding: 10, fontSize: 17}}>
                 Save this Recipe
               </Text>
-            </TouchableOpacity>
+            </TouchableOpacity> */}
           </View>
         )}
       </View>

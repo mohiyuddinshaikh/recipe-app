@@ -48,6 +48,7 @@ import Login from './components/Login';
 import ProfileScreen1 from './components/ProfileScreen1';
 import AsyncStorage from '@react-native-community/async-storage';
 import Logout from './components/Logout';
+import CategoryHomescreen from './components/CategoryHomescreen';
 
 const Stack = createStackNavigator();
 const Tab = createBottomTabNavigator();
@@ -187,6 +188,17 @@ const HomeStackNavigator = ({navigation, route}) => {
             component={RecipeInstructionsScreen}
             options={{
               title: 'Recipe Instruction Screen',
+              headerStyle: {
+                backgroundColor: '#f4511e',
+              },
+              headerTintColor: '#fff',
+            }}
+          />
+          <HomeStack.Screen
+            name="CategoryHomescreen"
+            component={CategoryHomescreen}
+            options={{
+              title: 'Category Home Screen',
               headerStyle: {
                 backgroundColor: '#f4511e',
               },

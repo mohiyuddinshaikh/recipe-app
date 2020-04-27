@@ -9,6 +9,7 @@ import {
   ImageBackground,
   ActivityIndicator,
   TextInput,
+  ScrollView,
 } from 'react-native';
 import * as Actions from '../store/actions/SaveAction';
 import * as MiscActions from '../store/actions/MiscActions';
@@ -34,8 +35,65 @@ let HomeScreen1 = ({navigation, route}) => {
   useEffect(() => {
     console.log('I ran');
     fetchUserData();
-    getRecipeFromApi();
+    // getRecipeFromApi();
   }, []);
+
+  const coverPictureArray = [
+    {
+      name: 'Chicken Corner',
+      image: require('../assets/images/cover/chicken.jpg'),
+      category: 1,
+      identifier: 'chicken',
+    },
+    {
+      name: 'Paneer Sizzlers',
+      image: require('../assets/images/cover/paneer.jpeg'),
+      category: 1,
+      identifier: 'paneer',
+    },
+    {
+      name: 'Pizza Mania',
+      image: require('../assets/images/cover/pizza.jpg'),
+      category: 3,
+      identifier: 'pizza',
+    },
+    {
+      name: 'Biryani Blast',
+      image: require('../assets/images/cover/biryani.jpeg'),
+      category: 3,
+      identifier: 'biryani',
+    },
+    {
+      name: 'Lunch',
+      image: require('../assets/images/cover/lunch.jpg'),
+      category: 2,
+      identifier: 'lunch',
+    },
+    {
+      name: 'Breakfast',
+      image: require('../assets/images/cover/breakfast.jpg'),
+      category: 2,
+      identifier: 'breakfast',
+    },
+    {
+      name: 'Snacks',
+      image: require('../assets/images/cover/snack.jpg'),
+      category: 2,
+      identifier: 'snack',
+    },
+    {
+      name: 'Soups',
+      image: require('../assets/images/cover/soup.jpg'),
+      category: 2,
+      identifier: 'soup',
+    },
+    {
+      name: 'Desserts',
+      image: require('../assets/images/cover/dessert.jpg'),
+      category: 2,
+      identifier: 'dessert',
+    },
+  ];
 
   const getRecipeFromApi = async () => {
     const foodItem = 'biryani';
@@ -270,46 +328,78 @@ let HomeScreen1 = ({navigation, route}) => {
   console.log('filteredRecipesState', filteredRecipes);
 
   const [x, setx] = useState([]);
-
+  var pracFlat = ['1', '1', '1', '1', '1', '1', '1', '1', '1'];
   return (
-    <View style={styles.parentBackground}>
-      {showSearchBar ? renderSearchBar() : null}
-
-      {filteredRecipes &&
-        filteredRecipes.length > 0 &&
-        filteredRecipes.map((item, index) => {
-          return (
-            <View
-              style={{
-                width: '95%',
-                backgroundColor: 'white',
-                color: 'black',
-                height: 45,
-                display: 'flex',
-                justifyContent: 'center',
-              }}>
-              <TouchableOpacity
-                activeOpacity={1}
-                onPress={() => {
-                  let data = {
-                    name: item.title,
-                    itemId: item.id,
-                    imageUrl: `${baseUrlSpoonacular + item.image}`,
-                  };
-                  navigation.navigate('RecipeDetailsScreen', data);
-                }}>
-                <Text> {item.title}</Text>
-              </TouchableOpacity>
-            </View>
-          );
-        })}
-
-      {renderFlatList()}
+    <View style={styles.mainContainer}>
+      <View style={styles.parentContainer}>
+        <ScrollView
+          style={{
+            width: '100%',
+          }}>
+          <View style={styles.randomRecipeContainer}>
+            <Image
+              source={require('../assets/images/cover/pizza.jpg')}
+              style={{width: '100%', height: 300}}
+            />
+            <Text>I have random recipe</Text>
+          </View>
+          <FlatList
+            style={{marginVertical: 10}}
+            data={coverPictureArray}
+            keyExtractor={item => item.name}
+            numColumns={3}
+            contentContainerStyle={{
+              flexGrow: 1,
+            }}
+            renderItem={({item, index}) => {
+              return (
+                <TouchableOpacity
+                  activeOpacity={1}
+                  onPress={() => {
+                    let data = {
+                      category: item.category,
+                      identifier: item.identifier,
+                      headerName: item.name,
+                    };
+                    navigation.navigate('CategoryHomescreen', data);
+                  }}>
+                  <View
+                    style={{
+                      marginHorizontal: 3,
+                      marginVertical: 5,
+                      display: 'flex',
+                      justifyContent: 'center',
+                      alignItems: 'center',
+                    }}>
+                    <Image
+                      source={item.image}
+                      style={{width: 120, height: 140}}
+                    />
+                    <Text>{item.name}</Text>
+                  </View>
+                </TouchableOpacity>
+              );
+            }}
+          />
+        </ScrollView>
+      </View>
     </View>
   );
 };
 
 const styles = {
+  mainContainer: {
+    justifyContent: 'center',
+    alignItems: 'center',
+    display: 'flex',
+  },
+  parentContainer: {
+    justifyContent: 'center',
+    alignItems: 'center',
+    display: 'flex',
+    width: '95%',
+    paddingVertical: 5,
+  },
   solocontainer: {
     height: 'auto',
     width: 190,
@@ -340,8 +430,11 @@ const styles = {
   parentBackground: {
     backgroundColor: '#dff9fb',
     // backgroundColor: '#9c88ff',
-    display: 'flex',
+    // minHeight: '100%',
+    padding: '2.5%',
+    flex: 1,
     alignItems: 'center',
+    justifyContent: 'center',
   },
   searchBox: {
     height: 45,
@@ -353,6 +446,18 @@ const styles = {
     flexDirection: 'row',
     justifyContent: 'space-between',
     display: 'flex',
+    alignItems: 'center',
+  },
+  randomRecipeContainer: {
+    width: '100%',
+    // height: '30%',
+    display: 'flex',
+    borderWidth: 2,
+    borderColor: 'black',
+    borderRadius: 10,
+    marginTop: 10,
+    backgroundColor: 'yellow',
+    justifyContent: 'center',
     alignItems: 'center',
   },
 };
