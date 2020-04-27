@@ -1,4 +1,6 @@
 import React, {useState, useEffect} from 'react';
+import {useDispatch, useSelector} from 'react-redux';
+
 import {
   View,
   Text,
@@ -10,57 +12,77 @@ import {
   ActivityIndicator,
   TextInput,
   ScrollView,
+  SafeAreaView,
 } from 'react-native';
 import axios from 'axios';
 import SearchFixed from '../search/SearchFixed';
 import spoonacularApiKey from '../../assets/constants/SpoonacularApiKey';
+import * as MiscActions from '../../store/actions/MiscActions';
 
 export default function Category1(props) {
   console.log('Category 1 props  :>> ', props);
+
+  let dispatch = useDispatch();
+  let viewMoreCount = useSelector(state => state.miscReducer.viewMoreCount);
   const [recipesFromApi, setRecipesFromApi] = useState(null);
   const [baseUrlSpoonacular, setBaseUrlSpoonacular] = useState();
+  const [moreRecipesLoading, setMoreRecipesLoading] = useState(false);
+  let viewMoreRecipes = [];
+  // let viewMoreCount = 0;
 
   useEffect(() => {
-    getRecipeFromApi();
+    // getRecipeFromApi();
     props.navigation.setOptions({
       title: props.data.headerName,
       // headerStyle: {backgroundColor: 'yellow'},
     });
   }, []);
 
+  useEffect(() => {
+    getRecipeFromApi();
+  }, [viewMoreCount]);
+
   const getRecipeFromApi = async () => {
-    console.log('inside get recipe function');
+    console.log('viewMoreCount :>> ', viewMoreCount);
     console.log('props.data.identifier :>> ', props.data.identifier);
     const foodItem = props.data.identifier;
     const numberOfResults = '10';
-    const url = `https://api.spoonacular.com/recipes/search?apiKey=${spoonacularApiKey}&query=${foodItem}&number=${numberOfResults}&instructionsRequired=true`;
+    let offset = viewMoreCount * 11 + 1;
+    console.log('offset :>> ', offset);
+    const url = `https://api.spoonacular.com/recipes/search?apiKey=${spoonacularApiKey}&query=${foodItem}&number=${numberOfResults}&offset=${offset}&instructionsRequired=true`;
     const response = await axios.get(url);
     console.log(response);
-    setRecipesFromApi(response.data.results);
+    if (viewMoreCount == 0) {
+      setRecipesFromApi(response.data.results);
+    }
     setBaseUrlSpoonacular(response.data.baseUri);
+    if (viewMoreCount > 0) {
+      viewMoreRecipes.push(response.data.results);
+      addExtra();
+    }
   };
 
   const addExtra = () => {
     // Mechanism for adding extra data in the flatlist on the go
     let arr = [...recipesFromApi];
-    let pro = {
-      id: 600320,
-      image: 'Palak-Paneer---Restaurant-style-Punjabi-Palak-Paneer-600320.jpg',
-      openLicense: 0,
-      readyInMinutes: 45,
-      servings: 4,
-      sourceUrl: 'http://www.spiceupthecurry.com/palak-paneer/',
-      title: 'Palak Paneer | Restaurant style Punjabi Palak Paneer',
-    };
-    arr.push(pro);
+    viewMoreRecipes[0].map(item => {
+      arr.push(item);
+    });
     console.log('arr :>> ', arr);
     setRecipesFromApi(arr);
+    setMoreRecipesLoading(false);
+  };
+
+  const handleViewMore = () => {
+    setMoreRecipesLoading(true);
+    dispatch(MiscActions.setViewMoreCount(viewMoreCount + 1));
   };
 
   return (
     <View style={styles.mainContainer}>
       <View style={styles.parentContainer}>
         <ScrollView
+          keyboardShouldPersistTaps={'handled'}
           contentContainerStyle={styles.scrollViewContentContainerStyle}>
           <SearchFixed renderDetails={props} />
           {recipesFromApi && (
@@ -68,7 +90,7 @@ export default function Category1(props) {
               style={styles.flatlistStyle}
               data={recipesFromApi}
               extraData={recipesFromApi}
-              keyExtractor={item => item.name}
+              keyExtractor={item => item.id}
               numColumns={2}
               renderItem={({item, index}) => {
                 return (
@@ -96,6 +118,15 @@ export default function Category1(props) {
               }}
             />
           )}
+          <TouchableOpacity activeOpacity={1} onPress={() => handleViewMore()}>
+            <View style={styles.viewMoreContainer}>
+              {moreRecipesLoading ? (
+                <ActivityIndicator />
+              ) : (
+                <Text style={{fontSize: 15}}> View More</Text>
+              )}
+            </View>
+          </TouchableOpacity>
         </ScrollView>
       </View>
     </View>
@@ -146,6 +177,13 @@ const styles = {
     display: 'flex',
     justifyContent: 'center',
     alignItems: 'center',
+  },
+  viewMoreContainer: {
+    borderWidth: 2,
+    padding: 10,
+    marginBottom: 15,
+    borderColor: '#f4511e',
+    borderRadius: 20,
   },
 };
 

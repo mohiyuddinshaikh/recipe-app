@@ -11,6 +11,7 @@ import {
   ActivityIndicator,
   TextInput,
   ScrollView,
+  StyleSheet,
 } from 'react-native';
 import Icon from 'react-native-vector-icons/FontAwesome';
 import spoonacularApiKey from '../../assets/constants/SpoonacularApiKey';
@@ -43,6 +44,7 @@ export default function SearchFixed(props) {
   // console.log("Changed a :>> ", a);
 
   const x = ['1', '1', '1', '1', '1', '1', '1', '1', '1', '2', '2'];
+  console.log('autoCompleteList :>> ', autoCompleteList);
 
   return (
     <View
@@ -67,6 +69,19 @@ export default function SearchFixed(props) {
           }}
           value={searchText}
         />
+        {(searchText && searchText !== null) || searchText != '' ? (
+          <Icon
+            style={{marginLeft: 'auto', marginRight: 10}}
+            name={'close'}
+            size={18}
+            color={'#111'}
+            onPress={() => {
+              console.log('Close pressed');
+              setSearchText('');
+              setAutoCompleteList(null);
+            }}
+          />
+        ) : null}
       </View>
 
       <View style={styles.searchIcon}>
@@ -78,7 +93,7 @@ export default function SearchFixed(props) {
         />
       </View>
 
-      {autoCompleteList && (
+      {autoCompleteList && autoCompleteList.length != 0 && (
         <View
           style={{
             width: '100%',
@@ -93,19 +108,16 @@ export default function SearchFixed(props) {
                 <TouchableOpacity
                   style={{width: '100%'}}
                   onPress={() => {
-                    console.log('Touchable pressed');
                     let data = {
                       name: item.title,
                       itemId: item.id,
-                      // imageUrl: `${baseUrlSpoonacular + item.image}`,
                     };
                     navigation.navigate('RecipeDetailsScreen', data);
-                    // setFilteredRecipes(null);
-                    // setSearchText('');
                   }}>
                   <Text style={{padding: 20, color: 'white', fontSize: 16}}>
                     {item.title}
                   </Text>
+
                   <View
                     style={{
                       display: 'flex',
@@ -129,7 +141,7 @@ export default function SearchFixed(props) {
   );
 }
 
-const styles = {
+const styles = StyleSheet.create({
   searchBox: {
     height: 45,
     borderColor: 'gray',
@@ -138,7 +150,7 @@ const styles = {
     marginTop: 10,
     borderRadius: 20,
     flexDirection: 'row',
-    justifyContent: 'space-between',
+    // justifyContent: 'space-around',
     display: 'flex',
     alignItems: 'center',
   },
@@ -152,4 +164,4 @@ const styles = {
     alignItems: 'center',
     marginLeft: '1%',
   },
-};
+});

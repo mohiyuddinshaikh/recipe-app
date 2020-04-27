@@ -204,7 +204,47 @@ export default function RecipeDetailsScreen1({navigation, route}) {
     }
   };
 
-  console.log('recipeDetailInformation :>> ', recipeDetailInformation);
+  const handleSaveRecipe = async () => {
+    ToastAndroid.showWithGravityAndOffset(
+      'Recipe Saved !',
+      ToastAndroid.LONG,
+      ToastAndroid.BOTTOM,
+      25,
+      50,
+    );
+    const dbData = {
+      recipeId: itemId,
+      recipeName: itemName,
+      recipeIngredients: ingredientsFromApi,
+      imageUrl: itemImage,
+    };
+    setIsRecipeSaved(true);
+
+    const updateData = await updateUserData(dbData);
+    console.log('updated Data', updateData);
+
+    const instructions = await getInstructions();
+    const instructionsData = {
+      recipeId: itemId,
+      recipeInstructions: instructions,
+    };
+    const resInstructionsData = await updateUserData(instructionsData);
+    console.log('resInstructionsData', resInstructionsData);
+    // save in store
+    const storeData = {
+      recipeObject: {
+        recipeId: itemId,
+        recipeName: itemName,
+        recipeArray: dbData.recipeIngredients,
+        imageUrl: itemImage,
+      },
+      instructionsObject: {
+        recipeId: itemId,
+        instructions: instructionsData.recipeInstructions,
+      },
+    };
+    dispatch(UserActions.addRecipe(storeData));
+  };
 
   return (
     <ScrollView
@@ -244,13 +284,20 @@ export default function RecipeDetailsScreen1({navigation, route}) {
           color="#841584"
         /> */}
         {isRecipeSaved ? (
-          <View>
+          <View
+            style={{
+              width: '90%',
+            }}>
             <TouchableOpacity
-              style={styles.ctaButtonRemove}
+              style={{
+                width: '100%',
+                backgroundColor: 'red',
+                paddingVertical: 10,
+              }}
               onPress={() => {
                 handleRemove();
               }}>
-              <Text style={{color: 'white', padding: 10, fontSize: 17}}>
+              <Text style={{textAlign: 'center', color: 'white', fontSize: 17}}>
                 Remove this recipe from saved
               </Text>
             </TouchableOpacity>
@@ -261,107 +308,16 @@ export default function RecipeDetailsScreen1({navigation, route}) {
               width: '90%',
             }}>
             <TouchableOpacity
-              onPress={async () => {
-                ToastAndroid.showWithGravityAndOffset(
-                  'Recipe Saved !',
-                  ToastAndroid.LONG,
-                  ToastAndroid.BOTTOM,
-                  25,
-                  50,
-                );
-                const dbData = {
-                  recipeId: itemId,
-                  recipeName: itemName,
-                  recipeIngredients: ingredientsFromApi,
-                  imageUrl: itemImage,
-                };
-                setIsRecipeSaved(true);
-
-                const updateData = await updateUserData(dbData);
-                console.log('updated Data', updateData);
-
-                const instructions = await getInstructions();
-                const instructionsData = {
-                  recipeId: itemId,
-                  recipeInstructions: instructions,
-                };
-                const resInstructionsData = await updateUserData(
-                  instructionsData,
-                );
-                console.log('resInstructionsData', resInstructionsData);
-                // save in store
-                const storeData = {
-                  recipeObject: {
-                    recipeId: itemId,
-                    recipeName: itemName,
-                    recipeArray: dbData.recipeIngredients,
-                    imageUrl: itemImage,
-                  },
-                  instructionsObject: {
-                    recipeId: itemId,
-                    instructions: instructionsData.recipeInstructions,
-                  },
-                };
-                dispatch(UserActions.addRecipe(storeData));
-              }}
               style={{
                 width: '100%',
                 backgroundColor: '#1aff8c',
                 paddingVertical: 10,
-              }}>
+              }}
+              onPress={() => handleSaveRecipe()}>
               <Text style={{textAlign: 'center', color: 'black', fontSize: 17}}>
                 Save this Recipe
               </Text>
             </TouchableOpacity>
-            {/* <TouchableOpacity
-              style={{width: '100%'}} 
-              onPress={async () => {
-                ToastAndroid.showWithGravityAndOffset(
-                  'Recipe Saved !',
-                  ToastAndroid.LONG,
-                  ToastAndroid.BOTTOM,
-                  25,
-                  50,
-                );
-                const dbData = {
-                  recipeId: itemId,
-                  recipeName: itemName,
-                  recipeIngredients: ingredientsFromApi,
-                  imageUrl: itemImage,
-                };
-                setIsRecipeSaved(true);
-
-                const updateData = await updateUserData(dbData);
-                console.log('updated Data', updateData);
-
-                const instructions = await getInstructions();
-                const instructionsData = {
-                  recipeId: itemId,
-                  recipeInstructions: instructions,
-                };
-                const resInstructionsData = await updateUserData(
-                  instructionsData,
-                );
-                console.log('resInstructionsData', resInstructionsData);
-                // save in store
-                const storeData = {
-                  recipeObject: {
-                    recipeId: itemId,
-                    recipeName: itemName,
-                    recipeArray: dbData.recipeIngredients,
-                    imageUrl: itemImage,
-                  },
-                  instructionsObject: {
-                    recipeId: itemId,
-                    instructions: instructionsData.recipeInstructions,
-                  },
-                };
-                dispatch(UserActions.addRecipe(storeData));
-              }}>
-              <Text style={{color: 'black', padding: 10, fontSize: 17}}>
-                Save this Recipe
-              </Text>
-            </TouchableOpacity> */}
           </View>
         )}
       </View>
@@ -377,12 +333,13 @@ export default function RecipeDetailsScreen1({navigation, route}) {
         <View
           style={{
             width: '90%',
-            backgroundColor: 'black',
-            display: 'flex',
-            justifyContent: 'center',
-            alignItems: 'center',
           }}>
           <TouchableOpacity
+            style={{
+              width: '100%',
+              backgroundColor: 'black',
+              paddingVertical: 10,
+            }}
             onPress={() => {
               let data = {
                 name: itemName,
@@ -390,7 +347,7 @@ export default function RecipeDetailsScreen1({navigation, route}) {
               };
               navigation.navigate('RecipeInstructionsScreen', data);
             }}>
-            <Text style={{color: 'white', padding: 10, fontSize: 17}}>
+            <Text style={{textAlign: 'center', color: 'white', fontSize: 17}}>
               Read Instructions
             </Text>
           </TouchableOpacity>

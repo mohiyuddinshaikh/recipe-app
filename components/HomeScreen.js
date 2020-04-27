@@ -35,6 +35,7 @@ let HomeScreen1 = ({navigation, route}) => {
   useEffect(() => {
     console.log('I ran');
     fetchUserData();
+    dispatch(MiscActions.setViewMoreCount(0));
     // getRecipeFromApi();
   }, []);
 

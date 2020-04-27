@@ -33,6 +33,6 @@ export default function CategoryHomescreen({route, navigation}) {
   ) : route.params.category == 2 ? (
     <Category2 />
   ) : (
-    <Category3 />
+    <Category3 data={data} navigation={navigation} />
   );
 }

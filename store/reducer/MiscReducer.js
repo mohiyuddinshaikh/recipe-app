@@ -3,6 +3,7 @@ const initState = {
   isLoggedIn: false,
   showLoginScreen: true,
   showSearchBar: false,
+  viewMoreCount: 0,
 };
 
 const miscReducer = (state = initState, action) => {
@@ -44,6 +45,16 @@ const miscReducer = (state = initState, action) => {
     state = {
       ...state,
       showSearchBar: action.payload,
+    };
+    console.log('reducer state after saving', state);
+    return state;
+  }
+
+  if (action.type === 'SET_VIEW_MORE_COUNT') {
+    console.log('reducer ka state', state);
+    state = {
+      ...state,
+      viewMoreCount: action.payload,
     };
     console.log('reducer state after saving', state);
     return state;
