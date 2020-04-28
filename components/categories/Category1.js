@@ -29,6 +29,7 @@ export default function Category1(props) {
   const [moreRecipesLoading, setMoreRecipesLoading] = useState(false);
   let viewMoreRecipes = [];
   // let viewMoreCount = 0;
+  console.log('viewMoreCount :>> ', viewMoreCount);
 
   useEffect(() => {
     // getRecipeFromApi();
@@ -78,13 +79,18 @@ export default function Category1(props) {
     dispatch(MiscActions.setViewMoreCount(viewMoreCount + 1));
   };
 
+  const sendSearchObject = {
+    ...props,
+    placeholder: `Search ${props.data.identifier} Recipes`,
+  };
+
   return (
     <View style={styles.mainContainer}>
       <View style={styles.parentContainer}>
         <ScrollView
           keyboardShouldPersistTaps={'handled'}
           contentContainerStyle={styles.scrollViewContentContainerStyle}>
-          <SearchFixed renderDetails={props} />
+          <SearchFixed renderDetails={sendSearchObject} showFixedText={true} />
           {recipesFromApi && (
             <FlatList
               style={styles.flatlistStyle}

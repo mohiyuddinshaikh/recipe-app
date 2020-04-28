@@ -145,31 +145,31 @@ const HomeStackNavigator = ({navigation, route}) => {
               },
               headerTintColor: '#fff',
               headerShown: true,
-              headerRight: () => (
-                <View style={{marginRight: 18}}>
-                  {showSearchBar ? (
-                    <Icon
-                      name={'close'}
-                      size={18}
-                      color={'white'}
-                      onPress={() => {
-                        console.log('Seacrh pressed');
-                        dispatch(MiscActions.showSearchBar(false));
-                      }}
-                    />
-                  ) : (
-                    <Icon
-                      name={'search'}
-                      size={18}
-                      color={'white'}
-                      onPress={() => {
-                        console.log('Seacrh pressed');
-                        dispatch(MiscActions.showSearchBar(true));
-                      }}
-                    />
-                  )}
-                </View>
-              ),
+              // headerRight: () => (
+              //   <View style={{marginRight: 18}}>
+              //     {showSearchBar ? (
+              //       <Icon
+              //         name={'close'}
+              //         size={18}
+              //         color={'white'}
+              //         onPress={() => {
+              //           console.log('Seacrh pressed');
+              //           dispatch(MiscActions.showSearchBar(false));
+              //         }}
+              //       />
+              //     ) : (
+              //       <Icon
+              //         name={'search'}
+              //         size={18}
+              //         color={'white'}
+              //         onPress={() => {
+              //           console.log('Seacrh pressed');
+              //           dispatch(MiscActions.showSearchBar(true));
+              //         }}
+              //       />
+              //     )}
+              //   </View>
+              // ),
             }}
           />
           <HomeStack.Screen

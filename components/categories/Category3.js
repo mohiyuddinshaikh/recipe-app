@@ -25,6 +25,7 @@ export default function Category3(props) {
   const [moreRecipesLoading, setMoreRecipesLoading] = useState(false);
   let viewMoreCount = useSelector(state => state.miscReducer.viewMoreCount);
   let viewMoreRecipes = [];
+  console.log('viewMoreCount :>> ', viewMoreCount);
 
   useEffect(() => {
     props.navigation.setOptions({
@@ -72,6 +73,10 @@ export default function Category3(props) {
     setRecipesFromApi(arr);
     setMoreRecipesLoading(false);
   };
+  const sendSearchObject = {
+    ...props,
+    placeholder: `Search ${props.data.identifier} Recipes`,
+  };
 
   return (
     <View style={styles.mainContainer}>
@@ -79,13 +84,13 @@ export default function Category3(props) {
         <ScrollView
           keyboardShouldPersistTaps={'handled'}
           contentContainerStyle={styles.scrollViewContentContainerStyle}>
-          <SearchFixed renderDetails={props} />
+          <SearchFixed renderDetails={sendSearchObject} showFixedText={true} />
           {recipesFromApi && (
             <FlatList
               style={styles.flatlistStyle}
               data={recipesFromApi}
               extraData={recipesFromApi}
-              keyExtractor={item => item.name}
+              keyExtractor={item => item.id}
               numColumns={2}
               renderItem={({item, index}) => {
                 return (

@@ -31,7 +31,7 @@ export default function CategoryHomescreen({route, navigation}) {
   return route != null && route != undefined && route.params.category == 1 ? (
     <Category1 data={data} navigation={navigation} />
   ) : route.params.category == 2 ? (
-    <Category2 />
+    <Category2 data={data} navigation={navigation} />
   ) : (
     <Category3 data={data} navigation={navigation} />
   );

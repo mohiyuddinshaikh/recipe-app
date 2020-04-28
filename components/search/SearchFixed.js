@@ -1,5 +1,7 @@
 import React, {useState, useEffect} from 'react';
 import axios from 'axios';
+import {useIsFocused} from '@react-navigation/native';
+
 import {
   View,
   Text,
@@ -17,21 +19,52 @@ import Icon from 'react-native-vector-icons/FontAwesome';
 import spoonacularApiKey from '../../assets/constants/SpoonacularApiKey';
 
 export default function SearchFixed(props) {
+  const isFocused = useIsFocused();
   console.log('Search fixed props :>> ', props);
-  const navigation = props.renderDetails.navigation;
-  const renderDetails = props.renderDetails.data;
+  const navigation = props.renderDetails.navigation
+    ? props.renderDetails.navigation
+    : null;
+  const renderDetails = props.renderDetails.data
+    ? props.renderDetails.data
+    : null;
   console.log('renderDetails :>> ', renderDetails);
   const [searchText, setSearchText] = useState('');
   const [autoCompleteList, setAutoCompleteList] = useState(null);
 
+  useEffect(() => {
+    setSearchText('');
+    setAutoCompleteList(null);
+  }, [isFocused]);
+
   const autoCompleteSearch = async text => {
-    let textToComplete = `${renderDetails.identifier} ${text}`;
-    console.log('textToComplete :>> ', textToComplete);
-    const numberOfResults = '10';
-    let url = `https://api.spoonacular.com/recipes/autocomplete?apiKey=${spoonacularApiKey}&number=${numberOfResults}&query=${textToComplete}`;
-    let response = await axios.get(url);
-    console.log(response);
-    setAutoCompleteList(response.data);
+    if (
+      renderDetails.category == 1 ||
+      renderDetails.category == 3 ||
+      renderDetails.category == 0
+    ) {
+      let textToComplete = props.showFixedText
+        ? `${renderDetails.identifier} ${text}`
+        : text;
+      console.log('textToComplete :>> ', textToComplete);
+      const numberOfResults = '10';
+      let url = `https://api.spoonacular.com/recipes/autocomplete?apiKey=${spoonacularApiKey}&number=${numberOfResults}&query=${textToComplete}`;
+      let response = await axios.get(url);
+      console.log(response);
+      setAutoCompleteList(response.data);
+    }
+    if (renderDetails.category == 2) {
+      let textToComplete = props.showFixedText
+        ? `${renderDetails.identifier} ${text}`
+        : text;
+      console.log('textToComplete :>> ', textToComplete);
+      const numberOfResults = '10';
+      let url = `https://api.spoonacular.com/recipes/autocomplete?apiKey=${spoonacularApiKey}&number=${numberOfResults}&query=${textToComplete}&type=${
+        renderDetails.identifier
+      }`;
+      let response = await axios.get(url);
+      console.log(response);
+      setAutoCompleteList(response.data);
+    }
   };
 
   // Template for replacing an array
@@ -57,17 +90,21 @@ export default function SearchFixed(props) {
         justifyContent: 'center',
       }}>
       <View style={styles.searchBox}>
-        <Text style={{marginLeft: 10, textTransform: 'capitalize'}}>
-          {renderDetails.identifier}
-        </Text>
+        {props.showFixedText ? (
+          <Text style={{marginLeft: 10, textTransform: 'capitalize'}}>
+            {renderDetails.identifier}
+          </Text>
+        ) : null}
+
         <TextInput
-          style={{width: '85%'}}
+          style={{width: '85%', paddingLeft: 10}}
           onChangeText={text => {
             console.log(text);
             setSearchText(text);
             autoCompleteSearch(text);
           }}
           value={searchText}
+          placeholder={props.renderDetails.placeholder}
         />
         {(searchText && searchText !== null) || searchText != '' ? (
           <Icon
@@ -108,6 +145,8 @@ export default function SearchFixed(props) {
                 <TouchableOpacity
                   style={{width: '100%'}}
                   onPress={() => {
+                    setSearchText('');
+                    setAutoCompleteList(null);
                     let data = {
                       name: item.title,
                       itemId: item.id,

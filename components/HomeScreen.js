@@ -23,9 +23,15 @@ import Octicon from 'react-native-vector-icons/Octicons';
 import {useDispatch, useSelector} from 'react-redux';
 import {getUserData} from '../api/user/UserOperations.api';
 
+import {useIsFocused} from '@react-navigation/native';
+import SearchFixed from './search/SearchFixed';
+
 let HomeScreen1 = ({navigation, route}) => {
   const userDataInStore = useSelector(state => state.userReducer.user);
   const showSearchBar = useSelector(state => state.miscReducer.showSearchBar);
+  let viewMoreCount = useSelector(state => state.miscReducer.viewMoreCount);
+  const isFocused = useIsFocused();
+  console.log('viewMoreCount :>> ', viewMoreCount);
 
   const [importedRecipes, setImportedRecipes] = useState(null);
   const [baseUrlSpoonacular, setBaseUrlSpoonacular] = useState();
@@ -35,9 +41,12 @@ let HomeScreen1 = ({navigation, route}) => {
   useEffect(() => {
     console.log('I ran');
     fetchUserData();
-    dispatch(MiscActions.setViewMoreCount(0));
     // getRecipeFromApi();
   }, []);
+
+  useEffect(() => {
+    dispatch(MiscActions.setViewMoreCount(0));
+  }, [isFocused]);
 
   const coverPictureArray = [
     {
@@ -68,7 +77,7 @@ let HomeScreen1 = ({navigation, route}) => {
       name: 'Lunch',
       image: require('../assets/images/cover/lunch.jpg'),
       category: 2,
-      identifier: 'lunch',
+      identifier: 'main course',
     },
     {
       name: 'Breakfast',
@@ -328,15 +337,24 @@ let HomeScreen1 = ({navigation, route}) => {
   };
   console.log('filteredRecipesState', filteredRecipes);
 
+  const sendSearchObject = {
+    data: {category: 0},
+    navigation: navigation,
+    placeholder: 'Search Food',
+  };
+
   const [x, setx] = useState([]);
   var pracFlat = ['1', '1', '1', '1', '1', '1', '1', '1', '1'];
   return (
     <View style={styles.mainContainer}>
       <View style={styles.parentContainer}>
         <ScrollView
+          keyboardShouldPersistTaps={'handled'}
           style={{
             width: '100%',
           }}>
+          <SearchFixed renderDetails={sendSearchObject} showFixedText={false} />
+
           <View style={styles.randomRecipeContainer}>
             <Image
               source={require('../assets/images/cover/pizza.jpg')}
