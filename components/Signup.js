@@ -56,17 +56,6 @@ export default function Signup({navigation, route}) {
     }
   };
 
-  const styles = StyleSheet.create({
-    inputBox: {
-      height: 50,
-      borderColor: 'gray',
-      borderWidth: 1,
-      width: '85%',
-      marginTop: 10,
-      borderRadius: 5,
-    },
-  });
-
   const getData = async () => {
     try {
       const value = await AsyncStorage.getItem('akey');
@@ -83,27 +72,12 @@ export default function Signup({navigation, route}) {
   };
 
   return (
-    <View
-      style={{
-        width: '100%',
-        height: '100%',
-        display: 'flex',
-        justifyContent: 'center',
-        alignItems: 'center',
-        backgroundColor: '#dff9fb',
-      }}>
+    <View style={styles.parentContainer}>
       <Image
         source={require('../assets/images/chef.jpg')}
-        style={{width: '80%', height: '40%'}}
+        style={styles.image}
       />
-      <View
-        style={{
-          display: 'flex',
-          alignItems: 'center',
-          width: '100%',
-          marginTop: '5%',
-        }}>
-        {/* <Text style={{fontSize: 20, marginBottom: 5}}>Recipe App - Signup</Text> */}
+      <View style={styles.textInputContainer}>
         {/* name,email,password */}
         <TextInput
           style={styles.inputBox}
@@ -127,19 +101,12 @@ export default function Signup({navigation, route}) {
           onPress={() => {
             handleSignup();
           }}>
-          <View
-            style={{
-              paddingVertical: 14,
-              paddingHorizontal: 25,
-              backgroundColor: '#1a8cff',
-              marginTop: '5%',
-              borderRadius: 10,
-            }}>
+          <View style={styles.loginTextContainer}>
             <Text style={{color: 'white'}}>SIGN UP</Text>
           </View>
         </TouchableOpacity>
 
-        <Text style={{marginTop: 10, fontSize: 15}}>
+        <Text style={styles.notAMemberText}>
           Already a member?<Text> </Text>
           <Text
             onPress={() => {
@@ -153,3 +120,45 @@ export default function Signup({navigation, route}) {
     </View>
   );
 }
+
+const styles = StyleSheet.create({
+  parentContainer: {
+    width: '100%',
+    height: '100%',
+    display: 'flex',
+    justifyContent: 'center',
+    alignItems: 'center',
+    backgroundColor: '#dff9fb',
+  },
+  inputBox: {
+    height: 50,
+    borderColor: 'gray',
+    borderWidth: 1,
+    width: '85%',
+    marginTop: 10,
+    borderRadius: 5,
+    paddingHorizontal: 10,
+  },
+  wrapperContainer: {
+    width: '100%',
+    height: '100%',
+    marginTop: 60,
+    display: 'flex',
+    alignItems: 'center',
+  },
+  image: {width: '80%', height: '40%'},
+  textInputContainer: {
+    display: 'flex',
+    alignItems: 'center',
+    width: '100%',
+    marginTop: '5%',
+  },
+  loginTextContainer: {
+    paddingVertical: 14,
+    paddingHorizontal: 25,
+    backgroundColor: '#1a8cff',
+    marginTop: '5%',
+    borderRadius: 10,
+  },
+  notAMemberText: {marginTop: 10, fontSize: 15},
+});

@@ -18,6 +18,12 @@ import {
 import Icon from 'react-native-vector-icons/FontAwesome';
 import spoonacularApiKey from '../../assets/constants/SpoonacularApiKey';
 
+// Categories description
+// Category 1 : ItemSpecificCategory : Chicken,Paneer
+// Category 2 : MealSpecificCategory : Breakfast, Lunch, Snack, Soup, Dessert,
+// Category 3 : FoodSpecificCategory : Biryani, Pizza
+// Category 4 : Cuisine
+
 export default function SearchFixed(props) {
   const isFocused = useIsFocused();
   console.log('Search fixed props :>> ', props);
@@ -37,6 +43,8 @@ export default function SearchFixed(props) {
   }, [isFocused]);
 
   const autoCompleteSearch = async text => {
+    let spoonacularKeyObject = await spoonacularApiKey({expired: false});
+    let spoonacularKey = spoonacularKeyObject.key;
     if (
       renderDetails.category == 1 ||
       renderDetails.category == 3 ||
@@ -47,7 +55,7 @@ export default function SearchFixed(props) {
         : text;
       console.log('textToComplete :>> ', textToComplete);
       const numberOfResults = '10';
-      let url = `https://api.spoonacular.com/recipes/autocomplete?apiKey=${spoonacularApiKey}&number=${numberOfResults}&query=${textToComplete}`;
+      let url = `https://api.spoonacular.com/recipes/autocomplete?apiKey=${spoonacularKey}&number=${numberOfResults}&query=${textToComplete}`;
       let response = await axios.get(url);
       console.log(response);
       setAutoCompleteList(response.data);
@@ -58,9 +66,23 @@ export default function SearchFixed(props) {
         : text;
       console.log('textToComplete :>> ', textToComplete);
       const numberOfResults = '10';
-      let url = `https://api.spoonacular.com/recipes/autocomplete?apiKey=${spoonacularApiKey}&number=${numberOfResults}&query=${textToComplete}&type=${
+      let url = `https://api.spoonacular.com/recipes/autocomplete?apiKey=${spoonacularKey}&number=${numberOfResults}&query=${textToComplete}&type=${
         renderDetails.identifier
       }`;
+      let response = await axios.get(url);
+      console.log(response);
+      setAutoCompleteList(response.data);
+    }
+    if (renderDetails.category == 4) {
+      let textToComplete = props.showFixedText
+        ? `${renderDetails.identifier} ${text}`
+        : text;
+      console.log('textToComplete :>> ', textToComplete);
+      const numberOfResults = '10';
+      let url = `https://api.spoonacular.com/recipes/autocomplete?apiKey=${spoonacularKey}&number=${numberOfResults}&query=${textToComplete}&cuisine=${
+        renderDetails.identifier
+      }`;
+      console.log('url1234 :>> ', url);
       let response = await axios.get(url);
       console.log(response);
       setAutoCompleteList(response.data);

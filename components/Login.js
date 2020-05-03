@@ -36,9 +36,7 @@ export default function Login() {
     console.log('login page pe token', token);
     if (token) {
       // check if token valid,call api for the same.
-      console.log('Kaam karign');
       const response = await checkTokenValidApi(token);
-      console.log('response in checkfortoken', response);
       if (response.status === 200) {
         dispatch(MiscActions.setIsLoggedIn(true));
         setShowLoader(false);
@@ -122,60 +120,22 @@ export default function Login() {
     }
   };
 
-  const styles = StyleSheet.create({
-    inputBox: {
-      height: 50,
-      borderColor: 'gray',
-      borderWidth: 1,
-      width: '85%',
-      marginTop: 10,
-      borderRadius: 5,
-    },
-  });
-
   return (
-    <View
-      style={{
-        width: '100%',
-        height: '100%',
-        display: 'flex',
-        // justifyContent: 'center',
-        alignItems: 'center',
-        backgroundColor: '#dff9fb',
-      }}>
-      <View
-        style={{
-          width: '100%',
-          height: '100%',
-          marginTop: 60,
-          display: 'flex',
-          alignItems: 'center',
-        }}>
+    <View style={styles.parentContainer}>
+      <View style={styles.wrapperContainer}>
         <Image
           source={require('../assets/images/chef.jpg')}
-          style={{width: '80%', height: '40%'}}
+          style={styles.image}
         />
         {showLoader ? (
           <ActivityIndicator
             size="large"
             color="#0000ff"
             animating={showLoader}
-            // hidesWhenStopped={true}
           />
         ) : null}
 
-        <View
-          style={{
-            display: 'flex',
-            alignItems: 'center',
-            width: '100%',
-            marginTop: '5%',
-          }}>
-          {/* <Text style={{fontSize: 20, marginBottom: 5}}>
-            Recipe App - Login
-          </Text> */}
-          {/* name,email,password */}
-
+        <View style={styles.textInputContainer}>
           <TextInput
             style={styles.inputBox}
             onChangeText={text => setEmail(text)}
@@ -192,19 +152,12 @@ export default function Login() {
             onPress={() => {
               handleLogin();
             }}>
-            <View
-              style={{
-                paddingVertical: 14,
-                paddingHorizontal: 25,
-                backgroundColor: '#1a8cff',
-                marginTop: '5%',
-                borderRadius: 10,
-              }}>
+            <View style={styles.loginTextContainer}>
               <Text style={{color: 'white'}}>LOGIN</Text>
             </View>
           </TouchableOpacity>
 
-          <Text style={{marginTop: 10, fontSize: 15}}>
+          <Text style={styles.notAMemberText}>
             Not a member?<Text> </Text>
             <Text
               onPress={() => {
@@ -219,3 +172,45 @@ export default function Login() {
     </View>
   );
 }
+
+const styles = StyleSheet.create({
+  parentContainer: {
+    width: '100%',
+    height: '100%',
+    display: 'flex',
+    justifyContent: 'center',
+    alignItems: 'center',
+    backgroundColor: '#dff9fb',
+  },
+  inputBox: {
+    height: 50,
+    borderColor: 'gray',
+    borderWidth: 1,
+    width: '85%',
+    marginTop: 10,
+    borderRadius: 5,
+    paddingHorizontal: 10,
+  },
+  wrapperContainer: {
+    width: '100%',
+    height: '100%',
+    marginTop: 60,
+    display: 'flex',
+    alignItems: 'center',
+  },
+  image: {width: '80%', height: '40%'},
+  textInputContainer: {
+    display: 'flex',
+    alignItems: 'center',
+    width: '100%',
+    marginTop: '5%',
+  },
+  loginTextContainer: {
+    paddingVertical: 14,
+    paddingHorizontal: 25,
+    backgroundColor: '#1a8cff',
+    marginTop: '5%',
+    borderRadius: 10,
+  },
+  notAMemberText: {marginTop: 10, fontSize: 15},
+});

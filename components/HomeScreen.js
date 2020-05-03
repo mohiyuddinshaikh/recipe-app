@@ -10,6 +10,7 @@ import {
   ActivityIndicator,
   TextInput,
   ScrollView,
+  StyleSheet,
 } from 'react-native';
 import * as Actions from '../store/actions/SaveAction';
 import * as MiscActions from '../store/actions/MiscActions';
@@ -26,95 +27,37 @@ import {getUserData} from '../api/user/UserOperations.api';
 import {useIsFocused} from '@react-navigation/native';
 import SearchFixed from './search/SearchFixed';
 
+import coverPictureArray from '../components/extras/coverPictureArry';
+import cuisinePictureArray from './extras/cuisinePictureArray';
+import getRecipeFromApi from './functions/GetRecipeFromApi';
+
 let HomeScreen1 = ({navigation, route}) => {
   const userDataInStore = useSelector(state => state.userReducer.user);
   const showSearchBar = useSelector(state => state.miscReducer.showSearchBar);
   let viewMoreCount = useSelector(state => state.miscReducer.viewMoreCount);
   const isFocused = useIsFocused();
-  console.log('viewMoreCount :>> ', viewMoreCount);
 
   const [importedRecipes, setImportedRecipes] = useState(null);
   const [baseUrlSpoonacular, setBaseUrlSpoonacular] = useState();
   const [searchText, setSearchText] = useState('');
-  console.log('route in homescreen', route);
+  const [randomRecipe, setRandomRecipe] = useState(null);
 
   useEffect(() => {
-    console.log('I ran');
     fetchUserData();
-    // getRecipeFromApi();
+    getRandomRecipe();
   }, []);
 
   useEffect(() => {
     dispatch(MiscActions.setViewMoreCount(0));
   }, [isFocused]);
 
-  const coverPictureArray = [
-    {
-      name: 'Chicken Corner',
-      image: require('../assets/images/cover/chicken.jpg'),
-      category: 1,
-      identifier: 'chicken',
-    },
-    {
-      name: 'Paneer Sizzlers',
-      image: require('../assets/images/cover/paneer.jpeg'),
-      category: 1,
-      identifier: 'paneer',
-    },
-    {
-      name: 'Pizza Mania',
-      image: require('../assets/images/cover/pizza.jpg'),
-      category: 3,
-      identifier: 'pizza',
-    },
-    {
-      name: 'Biryani Blast',
-      image: require('../assets/images/cover/biryani.jpeg'),
-      category: 3,
-      identifier: 'biryani',
-    },
-    {
-      name: 'Lunch',
-      image: require('../assets/images/cover/lunch.jpg'),
-      category: 2,
-      identifier: 'main course',
-    },
-    {
-      name: 'Breakfast',
-      image: require('../assets/images/cover/breakfast.jpg'),
-      category: 2,
-      identifier: 'breakfast',
-    },
-    {
-      name: 'Snacks',
-      image: require('../assets/images/cover/snack.jpg'),
-      category: 2,
-      identifier: 'snack',
-    },
-    {
-      name: 'Soups',
-      image: require('../assets/images/cover/soup.jpg'),
-      category: 2,
-      identifier: 'soup',
-    },
-    {
-      name: 'Desserts',
-      image: require('../assets/images/cover/dessert.jpg'),
-      category: 2,
-      identifier: 'dessert',
-    },
-  ];
-
-  const getRecipeFromApi = async () => {
-    const foodItem = 'biryani';
-    const numberOfResults = '10';
-    const response = await axios.get(
-      `https://api.spoonacular.com/recipes/search?apiKey=${spoonacularApiKey}&query=${foodItem}&number=${numberOfResults}&instructionsRequired=true`,
-    );
-    console.log(response);
-    setImportedRecipes(response.data.results);
-    setBaseUrlSpoonacular(response.data.baseUri);
+  const getRandomRecipe = async () => {
+    const dataToSend = {data: {category: 0}};
+    const response = await getRecipeFromApi(dataToSend);
+    setRandomRecipe(response.data.recipes[0]);
   };
+  console.log('randomRecipe :>> ', randomRecipe);
+
   console.log('importedRecipes', importedRecipes);
   const dispatch = useDispatch();
 
@@ -129,192 +72,6 @@ let HomeScreen1 = ({navigation, route}) => {
     }
   };
   console.log('User data in store', userDataInStore);
-
-  const renderFlatList = () => {
-    return (
-      <View style={{width: '98%'}}>
-        {importedRecipes === null || userDataInStore === null ? (
-          <View
-            style={{
-              height: '100%',
-              width: '100%',
-              display: 'flex',
-              justifyContent: 'center',
-              alignItems: 'center',
-            }}>
-            <Text style={{fontSize: 15, marginBottom: 10}}>
-              Loading Delicacies
-            </Text>
-            <ActivityIndicator size="large" color="#0000ff" />
-          </View>
-        ) : (
-          <View style={{paddingBottom: showSearchBar ? 190 : null}}>
-            <FlatList
-              data={importedRecipes}
-              keyExtractor={item => item.id}
-              numColumns={2}
-              renderItem={({item, index}) => {
-                return (
-                  <View style={styles.solocontainer}>
-                    <TouchableOpacity
-                      activeOpacity={1}
-                      onPress={() => {
-                        let data = {
-                          name: item.title,
-                          itemId: item.id,
-                          imageUrl: `${baseUrlSpoonacular + item.image}`,
-                          price: '500',
-                        };
-                        navigation.navigate('RecipeDetailsScreen', data);
-                        setFilteredRecipes(null);
-                        setSearchText('');
-                      }}>
-                      <View style={styles.container}>
-                        <ImageBackground
-                          source={{uri: `${baseUrlSpoonacular + item.image}`}}
-                          style={styles.image}
-                          // imageStyle={{borderRadius: 15}}
-                        >
-                          {userDataInStore &&
-                            userDataInStore.recipes.map(recipeItem =>
-                              recipeItem.recipeName === item.title ? (
-                                <View>
-                                  <Icon
-                                    style={{marginLeft: '5%', marginTop: '91%'}}
-                                    // style={{marginLeft: '90%'}}
-                                    name={'bookmark'}
-                                    size={20}
-                                    color={'#f4511e'}
-                                  />
-                                </View>
-                              ) : null,
-                            )}
-                        </ImageBackground>
-                        <View
-                          style={{
-                            height: 'auto',
-                            backgroundColor: 'white',
-                            display: 'flex',
-                            justifyContent: 'center',
-
-                            // borderRadius: 5,
-                          }}>
-                          <View
-                            style={{
-                              width: '95%',
-                              padding: 5,
-                              flex: 1,
-                              flexDirection: 'row',
-                              display: 'flex',
-                              justifyContent: 'center',
-                            }}>
-                            <Text
-                              style={{
-                                textAlign: 'center',
-                                color: 'black',
-                                fontSize: 16,
-                                fontWeight: '100',
-                              }}>
-                              {item.title}
-                            </Text>
-                          </View>
-                        </View>
-                      </View>
-                    </TouchableOpacity>
-                  </View>
-                );
-              }}
-            />
-          </View>
-        )}
-      </View>
-    );
-  };
-
-  const renderSearchBar = () => {
-    return (
-      <View
-        style={{
-          width: '94%',
-          flexDirection: 'row',
-          paddingBottom: 10,
-          display: 'flex',
-          flexWrap: 'wrap',
-          justifyContent: 'center',
-        }}>
-        <View style={styles.searchBox}>
-          <TextInput
-            placeholder="Search Recipe"
-            onChangeText={async text => {
-              await setSearchText(text);
-              findRecipe(text.toLowerCase());
-            }}
-            value={searchText}
-          />
-          {(searchText && searchText !== null) || searchText != '' ? (
-            <Icon
-              name={'close'}
-              size={15}
-              color={'#111'}
-              style={{marginRight: 10}}
-              onPress={() => {
-                setSearchText('');
-                setFilteredRecipes(null);
-              }}
-            />
-          ) : null}
-        </View>
-
-        <View
-          style={{
-            height: 45,
-            width: '8%',
-            marginTop: 10,
-            borderRadius: 5,
-            display: 'flex',
-            justifyContent: 'center',
-            alignItems: 'center',
-            marginLeft: '1%',
-          }}>
-          <Icon
-            name={'search'}
-            size={22}
-            color={'#111'}
-            onPress={() => findRecipe(searchText.toLowerCase())}
-          />
-        </View>
-        <View
-          style={{
-            height: 45,
-            width: '9%',
-            marginTop: 10,
-            borderRadius: 5,
-            display: 'flex',
-            justifyContent: 'center',
-            alignItems: 'center',
-            // marginLeft: '1%',
-          }}>
-          <Octicon
-            name={'settings'}
-            size={24}
-            color={'black'}
-            onPress={() => findRecipe(searchText.toLowerCase())}
-          />
-        </View>
-        <View>
-          <Icon
-            name={'close'}
-            size={18}
-            color={'black'}
-            style={{marginTop: 10}}
-            onPress={() => {
-              dispatch(MiscActions.showSearchBar(false));
-            }}
-          />
-        </View>
-      </View>
-    );
-  };
 
   const [filteredRecipes, setFilteredRecipes] = useState([]);
 
@@ -343,8 +100,24 @@ let HomeScreen1 = ({navigation, route}) => {
     placeholder: 'Search Food',
   };
 
-  const [x, setx] = useState([]);
-  var pracFlat = ['1', '1', '1', '1', '1', '1', '1', '1', '1'];
+  const handleFlatlistPress = item => {
+    let data = {
+      category: item.category,
+      identifier: item.identifier,
+      headerName: item.name,
+    };
+    navigation.navigate('CategoryHomescreen', data);
+  };
+
+  const goToDetailsScreen = () => {
+    let data = {
+      name: randomRecipe.title,
+      itemId: randomRecipe.id,
+      imageUrl: randomRecipe.image,
+    };
+    navigation.navigate('RecipeDetailsScreen', data);
+  };
+
   return (
     <View style={styles.mainContainer}>
       <View style={styles.parentContainer}>
@@ -355,13 +128,42 @@ let HomeScreen1 = ({navigation, route}) => {
           }}>
           <SearchFixed renderDetails={sendSearchObject} showFixedText={false} />
 
-          <View style={styles.randomRecipeContainer}>
-            <Image
-              source={require('../assets/images/cover/pizza.jpg')}
-              style={{width: '100%', height: 300}}
-            />
-            <Text>I have random recipe</Text>
-          </View>
+          {randomRecipe && (
+            <TouchableOpacity
+              activeOpacity={1}
+              onPress={() => goToDetailsScreen()}>
+              <View style={styles.randomRecipeContainer}>
+                <ImageBackground
+                  source={{uri: randomRecipe.image}}
+                  style={styles.randomRecipeImage}>
+                  <TouchableOpacity
+                    activeOpacity={1}
+                    onPress={() => {
+                      getRandomRecipe();
+                    }}>
+                    <View
+                      style={{
+                        height: 30,
+                        width: 30,
+                        backgroundColor: 'white',
+                        marginLeft: 'auto',
+                        display: 'flex',
+                        justifyContent: 'center',
+                        alignItems: 'center',
+                        borderWidth: 1,
+                        // borderTopRightRadius: 4,
+                      }}>
+                      <Icon name={'refresh'} size={18} color={'#111'} />
+                    </View>
+                  </TouchableOpacity>
+                </ImageBackground>
+                <Text style={styles.randomRecipeText}>
+                  {randomRecipe.title}
+                </Text>
+              </View>
+            </TouchableOpacity>
+          )}
+
           <FlatList
             style={{marginVertical: 10}}
             data={coverPictureArray}
@@ -374,25 +176,56 @@ let HomeScreen1 = ({navigation, route}) => {
               return (
                 <TouchableOpacity
                   activeOpacity={1}
-                  onPress={() => {
-                    let data = {
-                      category: item.category,
-                      identifier: item.identifier,
-                      headerName: item.name,
-                    };
-                    navigation.navigate('CategoryHomescreen', data);
-                  }}>
-                  <View
-                    style={{
-                      marginHorizontal: 3,
-                      marginVertical: 5,
-                      display: 'flex',
-                      justifyContent: 'center',
-                      alignItems: 'center',
-                    }}>
+                  onPress={() => handleFlatlistPress(item)}>
+                  <View style={styles.flatlistItemContainer}>
+                    <Image source={item.image} style={styles.flatListImage} />
+                    <Text>{item.name}</Text>
+                  </View>
+                </TouchableOpacity>
+              );
+            }}
+          />
+
+          <View
+            style={{
+              marginLeft: 5,
+              borderWidth: 2,
+              borderColor: '#f4511e',
+              borderRadius: 17,
+              display: 'flex',
+              flexDirection: 'row',
+              justifyContent: 'center',
+              alignItems: 'center',
+            }}>
+            <Text
+              style={{
+                fontSize: 18,
+                color: 'black',
+                marginLeft: 5,
+                paddingVertical: 5,
+                textAlign: 'center',
+              }}>
+              Cuisines From Around The Globe
+            </Text>
+            <View style={{marginLeft: 10, marginTop: 3}}>
+              <Icon name={'chevron-right'} size={13} color={'#111'} />
+            </View>
+          </View>
+
+          <FlatList
+            style={{marginVertical: 10}}
+            horizontal={true}
+            data={cuisinePictureArray}
+            keyExtractor={item => item.name}
+            renderItem={({item, index}) => {
+              return (
+                <TouchableOpacity
+                  activeOpacity={1}
+                  onPress={() => handleFlatlistPress(item)}>
+                  <View style={styles.flatlistItemContainer}>
                     <Image
                       source={item.image}
-                      style={{width: 120, height: 140}}
+                      style={styles.horizontalFlatlistImage}
                     />
                     <Text>{item.name}</Text>
                   </View>
@@ -406,7 +239,7 @@ let HomeScreen1 = ({navigation, route}) => {
   );
 };
 
-const styles = {
+const styles = StyleSheet.create({
   mainContainer: {
     justifyContent: 'center',
     alignItems: 'center',
@@ -472,12 +305,25 @@ const styles = {
     // height: '30%',
     display: 'flex',
     borderWidth: 2,
-    borderColor: 'black',
-    borderRadius: 10,
+    borderColor: '#f4511e',
+    borderBottomLeftRadius: 10,
+    borderBottomRightRadius: 10,
+    // borderBottomRadius: 10,
     marginTop: 10,
-    backgroundColor: 'yellow',
+    justifyContent: 'center',
+    alignItems: 'center',
+    // paddingHorizontal: 1,
+  },
+  randomRecipeImage: {width: '100%', height: 250},
+  randomRecipeText: {padding: 5, fontSize: 18, textAlign: 'center'},
+  flatlistItemContainer: {
+    marginHorizontal: 3,
+    marginVertical: 5,
+    display: 'flex',
     justifyContent: 'center',
     alignItems: 'center',
   },
-};
+  flatListImage: {width: 120, height: 140},
+  horizontalFlatlistImage: {width: 120, height: 140},
+});
 export default HomeScreen1;

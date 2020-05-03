@@ -10,6 +10,7 @@ import {
   ScrollView,
   ToastAndroid,
   Alert,
+  StyleSheet,
 } from 'react-native';
 import {Colors} from 'react-native/Libraries/NewAppScreen';
 import {useDispatch, useSelector} from 'react-redux';
@@ -43,21 +44,8 @@ export default function RecipeDetailsScreen1({navigation, route}) {
   let itemImagePath = itemName.toString().toLowerCase();
   console.log(itemImagePath);
   const [isRecipeSaved, setIsRecipeSaved] = useState(false);
-  // const [focusCount, setFocusCount] = useState(0);
 
   console.log('isCallerSavedScreen', isCallerSavedScreen);
-  // const isFocused = useIsFocused();
-
-  // if (isFocused) {
-  //   console.log('userDataInStore focus', userDataInStore);
-  //   userDataInStore.recipes.map(item => {
-  //     if (itemId === item.recipeId) {
-  //       setIsRecipeSaved(true);
-  //     } else {
-  //       setIsRecipeSaved(false);
-  //     }
-  //   });
-  // }
 
   useEffect(() => {
     console.log('Use effect ran');
@@ -66,7 +54,6 @@ export default function RecipeDetailsScreen1({navigation, route}) {
     getDetailedRecipeInformation();
     navigation.setOptions({title: itemName});
     dispatch(MiscActions.showSearchBar(false));
-    // dispatch(MiscActions.setIsCallerSavedScreen(false));
   }, []);
 
   const checkIfRecipeSaved = () => {
@@ -83,41 +70,76 @@ export default function RecipeDetailsScreen1({navigation, route}) {
   };
 
   const getRecipeIngredients = async () => {
-    if (isCallerSavedScreen === true) {
-      console.log('CHAA GAYA');
-      const itemIngredients = route.params.ingredients;
-      setIngredientsFromApi(itemIngredients);
-    } else {
-      console.log('NAHI CHAAAYAA');
+    let spoonacularKeyObject = await spoonacularApiKey({expired: false});
+    let spoonacularKey = spoonacularKeyObject.key;
+    const response = await axios.get(
+      `https://api.spoonacular.com/recipes/${itemId}/ingredientWidget.json?apiKey=${spoonacularKey}`,
+    );
+    console.log(response);
+    if (response.status == 200) {
+      setIngredientsFromApi(response.data.ingredients);
+    }
+    if (response.status == 402) {
+      let responseSpoonacularObject = await spoonacularApiKey({
+        expired: true,
+        id: spoonacularKeyObject.id,
+      });
       const response = await axios.get(
-        `https://api.spoonacular.com/recipes/${itemId}/ingredientWidget.json?apiKey=${spoonacularApiKey}`,
+        `https://api.spoonacular.com/recipes/${itemId}/ingredientWidget.json?apiKey=${
+          responseSpoonacularObject.key
+        }`,
       );
       console.log(response);
-      setIngredientsFromApi(response.data.ingredients);
+      if (response.status == 200) {
+        setIngredientsFromApi(response.data.ingredients);
+      } else {
+        ToastAndroid.showWithGravityAndOffset(
+          'Something went wrong, Please try again !',
+          ToastAndroid.LONG,
+          ToastAndroid.BOTTOM,
+          25,
+          50,
+        );
+        navigation.navigate('HomeScreen1');
+      }
     }
   };
 
   const getDetailedRecipeInformation = async () => {
+    let spoonacularKeyObject = await spoonacularApiKey({expired: false});
+    let spoonacularKey = spoonacularKeyObject.key;
     const response = await axios.get(
-      `https://api.spoonacular.com/recipes/${itemId}/information?apiKey=${spoonacularApiKey}`,
+      `https://api.spoonacular.com/recipes/${itemId}/information?apiKey=${spoonacularKey}`,
     );
     console.log(response);
-    setRecipeDetailInformation(response.data);
+    if (response.status == 200) {
+      setRecipeDetailInformation(response.data);
+    }
+    if (response.status == 402) {
+      let responseSpoonacularObject = await spoonacularApiKey({
+        expired: true,
+        id: spoonacularKeyObject.id,
+      });
+      const response = await axios.get(
+        `https://api.spoonacular.com/recipes/${itemId}/ingredientWidget.json?apiKey=${
+          responseSpoonacularObject.key
+        }`,
+      );
+      console.log(response);
+      if (response.status == 200) {
+        setRecipeDetailInformation(response.data);
+      } else {
+        ToastAndroid.showWithGravityAndOffset(
+          'Something went wrong, Please try again !',
+          ToastAndroid.LONG,
+          ToastAndroid.BOTTOM,
+          25,
+          50,
+        );
+        navigation.navigate('HomeScreen1');
+      }
+    }
   };
-
-  // const translateIngredientToHindi = () => {
-  //   console.log('Inside translate');
-  //   const ingredientHindi = [...ingredientsFromApi];
-  //   ingredientHindi.map(async item => {
-  //     const response = await axios.get(
-  //       `https://translate.googleapis.com/translate_a/single?client=gtx&sl=en&tl=hi&dt=t&q=${item.name}`,
-  //     );
-  //     console.log(response);
-  //     // console.log(response.data[0]);
-  //     // item.name = response[0][0][0];
-  //   });
-  //   console.log(ingredientHindi);
-  // };
 
   const renderIngredientTable = () => {
     return (
@@ -128,9 +150,9 @@ export default function RecipeDetailsScreen1({navigation, route}) {
             display: 'flex',
             justifyContent: 'center',
             alignItems: 'center',
-            paddingBottom: 200,
+            paddingBottom: 20,
           }}>
-          <View style={{width: '90%'}}>
+          <View style={{width: '100%'}}>
             <Table
               borderStyle={{
                 borderWidth: 1,
@@ -194,14 +216,50 @@ export default function RecipeDetailsScreen1({navigation, route}) {
   };
 
   const getInstructions = async () => {
+    let spoonacularKeyObject = await spoonacularApiKey({expired: false});
+    let spoonacularKey = spoonacularKeyObject.key;
     const response = await axios.get(
-      `https://api.spoonacular.com/recipes/${itemId}/analyzedInstructions?apiKey=${spoonacularApiKey}`,
+      `https://api.spoonacular.com/recipes/${itemId}/analyzedInstructions?apiKey=${spoonacularKey}`,
     );
-    console.log('INSTRCTIONS', response);
-    if (response.status === 200) {
+    console.log('response', response);
+    if (response.status == 200) {
       console.log('response.data[0].steps', response.data[0].steps);
       return response.data[0].steps;
     }
+    if (response.status == 402) {
+      let responseSpoonacularObject = await spoonacularApiKey({
+        expired: true,
+        id: spoonacularKeyObject.id,
+      });
+      const response = await axios.get(
+        `https://api.spoonacular.com/recipes/${itemId}/analyzedInstructions?apiKey=${
+          responseSpoonacularObject.key
+        }`,
+      );
+      console.log(response);
+      if (response.status == 200) {
+        console.log('response.data[0].steps', response.data[0].steps);
+        return response.data[0].steps;
+      } else {
+        ToastAndroid.showWithGravityAndOffset(
+          'Something went wrong, Please try again !',
+          ToastAndroid.LONG,
+          ToastAndroid.BOTTOM,
+          25,
+          50,
+        );
+        navigation.navigate('HomeScreen1');
+      }
+    }
+
+    // const response = await axios.get(
+    //   `https://api.spoonacular.com/recipes/${itemId}/analyzedInstructions?apiKey=${spoonacularApiKey}`,
+    // );
+    // console.log('INSTRCTIONS', response);
+    // if (response.status === 200) {
+    //   console.log('response.data[0].steps', response.data[0].steps);
+    //   return response.data[0].steps;
+    // }
   };
 
   const handleSaveRecipe = async () => {
@@ -247,129 +305,172 @@ export default function RecipeDetailsScreen1({navigation, route}) {
   };
 
   return (
-    <ScrollView
-      contentInsetAdjustmentBehavior="automatic"
-      contentContainerStyle={{
-        width: '100%',
-        display: 'flex',
-        justifyContent: 'center',
-        alignItems: 'center',
-        // backgroundColor: '#ffeaa7',
-        backgroundColor: '#dff9fb',
-        paddingBottom: 50,
-      }}>
-      <View
-        style={{
-          width: '95%',
-          height: '20%',
-          display: 'flex',
-          justifyContent: 'center',
-          marginTop: 120,
-        }}>
-        <Image
-          source={{
-            uri:
-              itemImage != undefined
-                ? itemImage
-                : recipeDetailInformation && recipeDetailInformation.image,
-          }}
-          style={{width: '100%', height: '100%'}}
-        />
-      </View>
-
-      <View style={styles.buttonContainer}>
-        {/* <Button
-          onPress={() => translateIngredientToHindi()}
-          title="Translate to hindi"
-          color="#841584"
-        /> */}
-        {isRecipeSaved ? (
-          <View
-            style={{
-              width: '90%',
-            }}>
-            <TouchableOpacity
+    <View style={styles.mainContainer}>
+      <View style={styles.parentContainer}>
+        <ScrollView
+          keyboardShouldPersistTaps={'handled'}
+          style={{width: '100%'}}>
+          <View style={styles.randomRecipeContainer}>
+            <Image
+              source={{
+                uri:
+                  itemImage != undefined
+                    ? itemImage
+                    : recipeDetailInformation && recipeDetailInformation.image,
+              }}
+              style={{width: '100%', height: 290, borderRadius: 10}}
+            />
+          </View>
+          {/* Buttons */}
+          <View style={styles.buttonContainer}>
+            {isRecipeSaved ? (
+              <View
+                style={{
+                  width: '100%',
+                }}>
+                <TouchableOpacity
+                  style={{
+                    width: '100%',
+                    backgroundColor: 'red',
+                    paddingVertical: 10,
+                  }}
+                  onPress={() => {
+                    handleRemove();
+                  }}>
+                  <Text
+                    style={{textAlign: 'center', color: 'white', fontSize: 17}}>
+                    Remove this recipe from saved
+                  </Text>
+                </TouchableOpacity>
+              </View>
+            ) : (
+              <View
+                style={{
+                  width: '100%',
+                }}>
+                <TouchableOpacity
+                  style={{
+                    width: '100%',
+                    backgroundColor: '#1aff8c',
+                    paddingVertical: 10,
+                  }}
+                  onPress={() => handleSaveRecipe()}>
+                  <Text
+                    style={{textAlign: 'center', color: 'black', fontSize: 17}}>
+                    Save this Recipe
+                  </Text>
+                </TouchableOpacity>
+              </View>
+            )}
+            <View
               style={{
                 width: '100%',
-                backgroundColor: 'red',
-                paddingVertical: 10,
-              }}
-              onPress={() => {
-                handleRemove();
+                marginTop: 2,
               }}>
-              <Text style={{textAlign: 'center', color: 'white', fontSize: 17}}>
-                Remove this recipe from saved
-              </Text>
-            </TouchableOpacity>
+              <TouchableOpacity
+                style={{
+                  width: '100%',
+                  backgroundColor: 'black',
+                  paddingVertical: 10,
+                }}
+                onPress={() => {
+                  let data = {
+                    name: itemName,
+                    id: itemId,
+                  };
+                  navigation.navigate('RecipeInstructionsScreen', data);
+                }}>
+                <Text
+                  style={{textAlign: 'center', color: 'white', fontSize: 17}}>
+                  Read Instructions
+                </Text>
+              </TouchableOpacity>
+            </View>
           </View>
-        ) : (
-          <View
-            style={{
-              width: '90%',
-            }}>
-            <TouchableOpacity
-              style={{
-                width: '100%',
-                backgroundColor: '#1aff8c',
-                paddingVertical: 10,
-              }}
-              onPress={() => handleSaveRecipe()}>
-              <Text style={{textAlign: 'center', color: 'black', fontSize: 17}}>
-                Save this Recipe
-              </Text>
-            </TouchableOpacity>
-          </View>
-        )}
-      </View>
 
-      <View
-        style={{
-          width: '85%',
-          marginBottom: 12,
-          display: 'flex',
-          justifyContent: 'center',
-          alignItems: 'center',
-        }}>
-        <View
-          style={{
-            width: '90%',
-          }}>
-          <TouchableOpacity
+          {/* Buttons end */}
+          <View
             style={{
               width: '100%',
-              backgroundColor: 'black',
-              paddingVertical: 10,
-            }}
-            onPress={() => {
-              let data = {
-                name: itemName,
-                id: itemId,
-              };
-              navigation.navigate('RecipeInstructionsScreen', data);
+              display: 'flex',
+              justifyContent: 'center',
+              alignItems: 'center',
             }}>
-            <Text style={{textAlign: 'center', color: 'white', fontSize: 17}}>
-              Read Instructions
+            <Text style={{fontSize: 20, marginBottom: 20, marginTop: 20}}>
+              List Of Ingredients :
             </Text>
-          </TouchableOpacity>
-        </View>
+            {renderIngredientTable()}
+          </View>
+        </ScrollView>
       </View>
-
-      <View
-        style={{
-          width: '100%',
-          display: 'flex',
-          justifyContent: 'center',
-          alignItems: 'center',
-        }}>
-        <Text style={{fontSize: 20, marginBottom: 20}}>
-          List Of Ingredients :
-        </Text>
-        {renderIngredientTable()}
-      </View>
-    </ScrollView>
+    </View>
   );
 }
-const styles = {
+
+const styles = StyleSheet.create({
+  mainContainer: {
+    justifyContent: 'center',
+    alignItems: 'center',
+    display: 'flex',
+  },
+  parentContainer: {
+    justifyContent: 'center',
+    alignItems: 'center',
+    display: 'flex',
+    width: '95%',
+    paddingVertical: 5,
+  },
+  flatlistStyle: {marginVertical: 0, marginLeft: 1},
+  flatlistParentContainer: {
+    height: 'auto',
+    width: 190,
+    marginBottom: 20,
+  },
+  flatlistImage: {
+    width: 180,
+    height: 180,
+    borderRadius: 10,
+  },
+  flatlistTextContainer: {
+    width: '100%',
+    height: 'auto',
+    display: 'flex',
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginTop: 5,
+  },
+  flatlistText: {
+    textAlign: 'center',
+    fontSize: 15,
+    paddingHorizontal: 5,
+  },
+  scrollViewContentContainerStyle: {
+    width: '100%',
+    display: 'flex',
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  viewMoreContainer: {
+    borderWidth: 2,
+    padding: 10,
+    marginBottom: 15,
+    borderColor: '#f4511e',
+    borderRadius: 20,
+  },
+  randomRecipeContainer: {
+    width: '100%',
+    // height: '30%',
+    display: 'flex',
+    // borderWidth: 2,
+    borderColor: 'black',
+    borderRadius: 10,
+    marginTop: 10,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+
   scrollView: {
     backgroundColor: Colors.lighter,
   },
@@ -426,9 +527,9 @@ const styles = {
   head: {height: 40, backgroundColor: '#f1f8ff'},
   text: {margin: 6},
   buttonContainer: {
-    width: '85%',
+    width: '100%',
     marginTop: 20,
-    marginBottom: 5,
+    // marginBottom: 5,
     display: 'flex',
     justifyContent: 'center',
     alignItems: 'center',
@@ -447,4 +548,4 @@ const styles = {
     justifyContent: 'center',
     alignItems: 'center',
   },
-};
+});

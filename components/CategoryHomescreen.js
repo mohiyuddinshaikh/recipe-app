@@ -22,6 +22,7 @@ import Category3 from './categories/Category3';
 // Category 1 : ItemSpecificCategory : Chicken,Paneer
 // Category 2 : MealSpecificCategory : Breakfast, Lunch, Snack, Soup, Dessert,
 // Category 3 : FoodSpecificCategory : Biryani, Pizza
+// Category 4 : Cuisine
 
 export default function CategoryHomescreen({route, navigation}) {
   console.log('route.params :>> ', route.params);
@@ -30,7 +31,7 @@ export default function CategoryHomescreen({route, navigation}) {
 
   return route != null && route != undefined && route.params.category == 1 ? (
     <Category1 data={data} navigation={navigation} />
-  ) : route.params.category == 2 ? (
+  ) : route.params.category == 2 || route.params.category == 4 ? (
     <Category2 data={data} navigation={navigation} />
   ) : (
     <Category3 data={data} navigation={navigation} />

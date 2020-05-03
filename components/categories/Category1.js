@@ -16,8 +16,8 @@ import {
 } from 'react-native';
 import axios from 'axios';
 import SearchFixed from '../search/SearchFixed';
-import spoonacularApiKey from '../../assets/constants/SpoonacularApiKey';
 import * as MiscActions from '../../store/actions/MiscActions';
+import getRecipeFromApi from '../functions/GetRecipeFromApi';
 
 export default function Category1(props) {
   console.log('Category 1 props  :>> ', props);
@@ -29,10 +29,10 @@ export default function Category1(props) {
   const [moreRecipesLoading, setMoreRecipesLoading] = useState(false);
   let viewMoreRecipes = [];
   // let viewMoreCount = 0;
+
   console.log('viewMoreCount :>> ', viewMoreCount);
 
   useEffect(() => {
-    // getRecipeFromApi();
     props.navigation.setOptions({
       title: props.data.headerName,
       // headerStyle: {backgroundColor: 'yellow'},
@@ -40,19 +40,12 @@ export default function Category1(props) {
   }, []);
 
   useEffect(() => {
-    getRecipeFromApi();
+    fetchRecipeFromApi();
   }, [viewMoreCount]);
 
-  const getRecipeFromApi = async () => {
-    console.log('viewMoreCount :>> ', viewMoreCount);
-    console.log('props.data.identifier :>> ', props.data.identifier);
-    const foodItem = props.data.identifier;
-    const numberOfResults = '10';
-    let offset = viewMoreCount * 11 + 1;
-    console.log('offset :>> ', offset);
-    const url = `https://api.spoonacular.com/recipes/search?apiKey=${spoonacularApiKey}&query=${foodItem}&number=${numberOfResults}&offset=${offset}&instructionsRequired=true`;
-    const response = await axios.get(url);
-    console.log(response);
+  const fetchRecipeFromApi = async () => {
+    let propsToSend = {...props, viewMoreCount};
+    let response = await getRecipeFromApi(propsToSend);
     if (viewMoreCount == 0) {
       setRecipesFromApi(response.data.results);
     }
@@ -84,6 +77,15 @@ export default function Category1(props) {
     placeholder: `Search ${props.data.identifier} Recipes`,
   };
 
+  const goToDetailsScreen = item => {
+    let data = {
+      name: item.title,
+      itemId: item.id,
+      imageUrl: `${baseUrlSpoonacular + item.image}`,
+    };
+    props.navigation.navigate('RecipeDetailsScreen', data);
+  };
+
   return (
     <View style={styles.mainContainer}>
       <View style={styles.parentContainer}>
@@ -103,18 +105,13 @@ export default function Category1(props) {
                   <View style={styles.flatlistParentContainer}>
                     <TouchableOpacity
                       activeOpacity={1}
-                      onPress={() => {
-                        let data = {
-                          name: item.title,
-                          itemId: item.id,
-                          imageUrl: `${baseUrlSpoonacular + item.image}`,
-                        };
-                        props.navigation.navigate('RecipeDetailsScreen', data);
-                      }}>
-                      <Image
+                      onPress={() => goToDetailsScreen(item)}>
+                      <ImageBackground
                         source={{uri: `${baseUrlSpoonacular + item.image}`}}
-                        style={styles.flatlistImage}
-                      />
+                        style={styles.flatlistImage}>
+                        <Text>Some text</Text>
+                      </ImageBackground>
+
                       <View style={styles.flatlistTextContainer}>
                         <Text style={styles.flatlistText}>{item.title}</Text>
                       </View>
@@ -192,18 +189,3 @@ const styles = {
     borderRadius: 20,
   },
 };
-
-// export default function Category1(props) {
-//   console.log('props :>> ', props);
-//   return (
-//     <View>
-//       <Button
-//         title="Press me"
-//         onPress={() => {
-//           console.log('Button was pressed ');
-//           props.navigation.navigate('Home');
-//         }}
-//       />
-//     </View>
-//   );
-// }

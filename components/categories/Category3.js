@@ -14,9 +14,9 @@ import {
 } from 'react-native';
 import axios from 'axios';
 import SearchFixed from '../search/SearchFixed';
-import spoonacularApiKey from '../../assets/constants/SpoonacularApiKey';
 import {useDispatch, useSelector} from 'react-redux';
 import * as MiscActions from '../../store/actions/MiscActions';
+import getRecipeFromApi from '../functions/GetRecipeFromApi';
 
 export default function Category3(props) {
   let dispatch = useDispatch();
@@ -34,20 +34,12 @@ export default function Category3(props) {
   }, []);
 
   useEffect(() => {
-    getRecipeFromApi();
+    fetchRecipeFromApi();
   }, [viewMoreCount]);
 
-  const getRecipeFromApi = async () => {
-    console.log('inside get recipe function');
-    console.log('props.data.identifier :>> ', props.data.identifier);
-    const foodItem = props.data.identifier;
-    const numberOfResults = '10';
-    let offset = viewMoreCount * 11 + 1;
-    console.log('offset :>> ', offset);
-
-    const url = `https://api.spoonacular.com/recipes/search?apiKey=${spoonacularApiKey}&query=${foodItem}&number=${numberOfResults}&offset=${offset}&instructionsRequired=true`;
-    const response = await axios.get(url);
-    console.log(response);
+  const fetchRecipeFromApi = async () => {
+    let propsToSend = {...props, viewMoreCount};
+    let response = await getRecipeFromApi(propsToSend);
     if (viewMoreCount == 0) {
       setRecipesFromApi(response.data.results);
     }

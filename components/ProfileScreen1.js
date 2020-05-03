@@ -12,24 +12,27 @@ import {
   ScrollView,
   ToastAndroid,
   Alert,
+  StyleSheet,
 } from 'react-native';
 
 export default function ProfileScreen1() {
   const userDataInStore = useSelector(state => state.userReducer.user);
   console.log('PROFILE SCREEN KA DATA', userDataInStore);
   return (
-    <View
-      style={{
-        flex: 1,
-        justifyContent: 'center',
-        alignItems: 'center',
-        backgroundColor: '#dff9fb',
-      }}>
+    <View style={styles.parentContainer}>
       {userDataInStore && (
-        <Text style={{fontSize: 20, textTransform: 'capitalize'}}>
-          Hello {userDataInStore.name} !
-        </Text>
+        <Text style={styles.helloText}>Hello {userDataInStore.name} !</Text>
       )}
     </View>
   );
 }
+
+const styles = StyleSheet.create({
+  parentContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    backgroundColor: '#dff9fb',
+  },
+  helloText: {fontSize: 20, textTransform: 'capitalize'},
+});
