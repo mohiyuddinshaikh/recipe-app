@@ -19,10 +19,10 @@ const cuisinePictureArray = [
     identifier: 'Middle Eastern',
   },
   {
-    name: 'Japanese',
-    image: require('../../assets/images/cover/cuisines/japanese.jpg'),
+    name: 'Spanish',
+    image: require('../../assets/images/cover/cuisines/spanish.jpg'),
     category: 4,
-    identifier: 'Japanese',
+    identifier: 'Spanish',
   },
   {
     name: 'Italian',
