@@ -108,9 +108,8 @@ export default function Category1(props) {
                       onPress={() => goToDetailsScreen(item)}>
                       <ImageBackground
                         source={{uri: `${baseUrlSpoonacular + item.image}`}}
-                        style={styles.flatlistImage}>
-                        <Text>Some text</Text>
-                      </ImageBackground>
+                        style={styles.flatlistImage}
+                      />
 
                       <View style={styles.flatlistTextContainer}>
                         <Text style={styles.flatlistText}>{item.title}</Text>
@@ -121,6 +120,7 @@ export default function Category1(props) {
               }}
             />
           )}
+
           <TouchableOpacity activeOpacity={1} onPress={() => handleViewMore()}>
             <View style={styles.viewMoreContainer}>
               {moreRecipesLoading ? (
