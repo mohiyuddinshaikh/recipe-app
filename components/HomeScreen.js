@@ -31,6 +31,18 @@ import coverPictureArray from '../components/extras/coverPictureArry';
 import cuisinePictureArray from './extras/cuisinePictureArray';
 import getRecipeFromApi from './functions/GetRecipeFromApi';
 
+import {Dimensions} from 'react-native';
+import {
+  widthPercentageToDP as wp,
+  heightPercentageToDP as hp,
+} from 'react-native-responsive-screen';
+import colors from '../assets/constants/Colors';
+
+const windowWidth = Math.round(Dimensions.get('window').width);
+const windowHeight = Math.round(Dimensions.get('window').height);
+const h = Math.round(windowHeight / 100);
+const w = Math.round(windowWidth / 100);
+
 let HomeScreen1 = ({navigation, route}) => {
   const userDataInStore = useSelector(state => state.userReducer.user);
   const showSearchBar = useSelector(state => state.miscReducer.showSearchBar);
@@ -45,6 +57,10 @@ let HomeScreen1 = ({navigation, route}) => {
   useEffect(() => {
     fetchUserData();
     getRandomRecipe();
+    console.log('windowWidth :>> ', windowWidth);
+    console.log('windowHeight :>> ', windowHeight);
+    console.log('w :>> ', w);
+    console.log('h :>> ', h);
   }, []);
 
   useEffect(() => {
@@ -123,6 +139,7 @@ let HomeScreen1 = ({navigation, route}) => {
       <View style={styles.parentContainer}>
         <ScrollView
           keyboardShouldPersistTaps={'handled'}
+          showsVerticalScrollIndicator={false}
           style={{
             width: '100%',
           }}>
@@ -190,7 +207,7 @@ let HomeScreen1 = ({navigation, route}) => {
             style={{
               marginLeft: 5,
               borderWidth: 2,
-              borderColor: '#f4511e',
+              borderColor: colors.themeColor,
               borderRadius: 17,
               display: 'flex',
               flexDirection: 'row',
@@ -305,7 +322,7 @@ const styles = StyleSheet.create({
     // height: '30%',
     display: 'flex',
     borderWidth: 2,
-    borderColor: '#f4511e',
+    borderColor: colors.themeColor,
     borderBottomLeftRadius: 10,
     borderBottomRightRadius: 10,
     // borderBottomRadius: 10,
@@ -323,7 +340,7 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
   },
-  flatListImage: {width: 120, height: 140},
-  horizontalFlatlistImage: {width: 120, height: 140},
+  flatListImage: {width: wp('31%'), height: hp('18%')},
+  horizontalFlatlistImage: {width: wp('31%'), height: 140},
 });
 export default HomeScreen1;

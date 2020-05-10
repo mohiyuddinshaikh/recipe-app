@@ -49,6 +49,8 @@ import ProfileScreen1 from './components/ProfileScreen1';
 import AsyncStorage from '@react-native-community/async-storage';
 import Logout from './components/Logout';
 import CategoryHomescreen from './components/CategoryHomescreen';
+import SplashScreen from 'react-native-splash-screen';
+import colors from './assets/constants/Colors';
 
 const Stack = createStackNavigator();
 const Tab = createBottomTabNavigator();
@@ -60,8 +62,6 @@ const HomeTabNavigator = () => {
       initialRouteName="Home"
       screenOptions={({route}) => ({
         tabBarIcon: ({focused, color, size}) => {
-          // console.log('Upar vaale ka route', route);
-
           let iconName;
           if (route.name === 'Home') {
             iconName = 'home';
@@ -77,8 +77,9 @@ const HomeTabNavigator = () => {
         tabBarVisible: route.name === 'Home' ? false : true,
       })}
       tabBarOptions={{
-        activeTintColor: '#f4511e',
-        inactiveTintColor: 'gray',
+        activeTintColor: colors.themeColor,
+        inactiveTintColor: '#b3b3b3',
+        keyboardHidesTabBar: true,
       }}>
       <Tab.Screen name="Saved" component={SavedRecipeScreen1} />
       <Tab.Screen name="Home" component={HomeStackNavigator} />
@@ -139,9 +140,9 @@ const HomeStackNavigator = ({navigation, route}) => {
             name="Home"
             component={HomeScreen1}
             options={{
-              title: 'Recipe App',
+              title: 'FoodStack',
               headerStyle: {
-                backgroundColor: '#f4511e',
+                backgroundColor: colors.themeColor,
               },
               headerTintColor: '#fff',
               headerShown: true,
@@ -178,7 +179,7 @@ const HomeStackNavigator = ({navigation, route}) => {
             options={{
               title: 'Recipe Details Screen',
               headerStyle: {
-                backgroundColor: '#f4511e',
+                backgroundColor: colors.themeColor,
               },
               headerTintColor: '#fff',
             }}
@@ -189,7 +190,7 @@ const HomeStackNavigator = ({navigation, route}) => {
             options={{
               title: 'Recipe Instruction Screen',
               headerStyle: {
-                backgroundColor: '#f4511e',
+                backgroundColor: colors.themeColor,
               },
               headerTintColor: '#fff',
             }}
@@ -200,7 +201,7 @@ const HomeStackNavigator = ({navigation, route}) => {
             options={{
               title: 'Category Home Screen',
               headerStyle: {
-                backgroundColor: '#f4511e',
+                backgroundColor: colors.themeColor,
               },
               headerTintColor: '#fff',
             }}
@@ -213,9 +214,9 @@ const HomeStackNavigator = ({navigation, route}) => {
               name="Login"
               component={Login}
               options={{
-                title: 'Recipe App - Login',
+                title: 'FoodStack - Login',
                 headerStyle: {
-                  backgroundColor: '#f4511e',
+                  backgroundColor: colors.themeColor,
                 },
                 headerTintColor: '#fff',
               }}
@@ -225,9 +226,9 @@ const HomeStackNavigator = ({navigation, route}) => {
               name="Signup"
               component={Signup}
               options={{
-                title: 'Recipe App - Signup',
+                title: 'FoodStack - Signup',
                 headerStyle: {
-                  backgroundColor: '#f4511e',
+                  backgroundColor: colors.themeColor,
                 },
                 headerTintColor: '#fff',
               }}
@@ -380,8 +381,6 @@ const showHeaderRightContent = (route, navigation) => {
 };
 
 const App: () => React$Node = () => {
-  // const isLoggedIn = useSelector(state => state.miscReducer.isLoggedIn);
-  // console.log('isLoggedIn', isLoggedIn);
   return (
     <>
       <Provider store={store}>
@@ -396,13 +395,13 @@ const App: () => React$Node = () => {
                 headerRightTintColor: '#fff',
                 headerShown: shouldHeaderBeShown(route),
                 headerStyle: {
-                  backgroundColor: '#f4511e',
+                  backgroundColor: colors.themeColor,
                 },
                 headerTintColor: '#fff',
               })}
             />
-            <Stack.Screen name="Saved" component={SavedRecipeScreen1} />
-            <Stack.Screen name="Profile" component={ProfileScreen1} />
+            {/* <Stack.Screen name="Saved" component={SavedRecipeScreen1} /> */}
+            {/* <Stack.Screen name="Profile" component={ProfileScreen1} /> */}
             <Stack.Screen name="Logout" component={Logout} />
           </Stack.Navigator>
         </NavigationContainer>

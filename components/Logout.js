@@ -11,8 +11,6 @@ export default function Logout({navigation}) {
     dispatch(MiscActions.setIsLoggedIn(false));
     dispatch(MiscActions.showLoginScreen(true));
     navigation.navigate('Home');
-
-    // alert('You have been logged out');
   }, []);
   return (
     <View

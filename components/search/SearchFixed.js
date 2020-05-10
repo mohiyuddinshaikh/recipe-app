@@ -17,6 +17,7 @@ import {
 } from 'react-native';
 import Icon from 'react-native-vector-icons/FontAwesome';
 import spoonacularApiKey from '../../assets/constants/SpoonacularApiKey';
+import colors from '../../assets/constants/Colors';
 
 // Categories description
 // Category 1 : ItemSpecificCategory : Chicken,Paneer
@@ -101,6 +102,8 @@ export default function SearchFixed(props) {
   const x = ['1', '1', '1', '1', '1', '1', '1', '1', '1', '2', '2'];
   console.log('autoCompleteList :>> ', autoCompleteList);
 
+  const [changeColor, setChangeColor] = useState(false);
+
   return (
     <View
       style={{
@@ -111,7 +114,7 @@ export default function SearchFixed(props) {
         flexWrap: 'wrap',
         justifyContent: 'center',
       }}>
-      <View style={styles.searchBox}>
+      <View style={!changeColor ? styles.searchBox : styles.searchBoxActive}>
         {props.showFixedText ? (
           <Text style={{marginLeft: 10, textTransform: 'capitalize'}}>
             {renderDetails.identifier}
@@ -127,6 +130,8 @@ export default function SearchFixed(props) {
           }}
           value={searchText}
           placeholder={props.renderDetails.placeholder}
+          onFocus={() => setChangeColor(true)}
+          onBlur={() => setChangeColor(false)}
         />
         {(searchText && searchText !== null) || searchText != '' ? (
           <Icon
@@ -209,7 +214,19 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     width: '91%',
     marginTop: 10,
-    borderRadius: 20,
+    borderRadius: 25,
+    flexDirection: 'row',
+    // justifyContent: 'space-around',
+    display: 'flex',
+    alignItems: 'center',
+  },
+  searchBoxActive: {
+    height: 45,
+    borderColor: colors.themeColor,
+    borderWidth: 2,
+    width: '91%',
+    marginTop: 10,
+    borderRadius: 25,
     flexDirection: 'row',
     // justifyContent: 'space-around',
     display: 'flex',

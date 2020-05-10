@@ -16,7 +16,7 @@ const userReducer = (state = initState, action) => {
     console.log('payload ka data', action.payload);
     console.log('reducer ka state', state);
     state = {
-      user: {...action.payload},
+      user: {...state.user, ...action.payload},
     };
     return state;
   }

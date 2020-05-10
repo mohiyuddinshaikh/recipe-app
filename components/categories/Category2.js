@@ -17,6 +17,11 @@ import SearchFixed from '../search/SearchFixed';
 import {useDispatch, useSelector} from 'react-redux';
 import * as MiscActions from '../../store/actions/MiscActions';
 import getRecipeFromApi from '../functions/GetRecipeFromApi';
+import {
+  widthPercentageToDP as wp,
+  heightPercentageToDP as hp,
+} from 'react-native-responsive-screen';
+import colors from '../../assets/constants/Colors';
 
 export default function Category2(props) {
   let dispatch = useDispatch();
@@ -74,10 +79,11 @@ export default function Category2(props) {
     <View style={styles.mainContainer}>
       <View style={styles.parentContainer}>
         <ScrollView
+          showsVerticalScrollIndicator={false}
           keyboardShouldPersistTaps={'handled'}
           contentContainerStyle={styles.scrollViewContentContainerStyle}>
           <SearchFixed renderDetails={sendSearchObject} showFixedText={false} />
-          {recipesFromApi && (
+          {recipesFromApi && recipesFromApi != null ? (
             <FlatList
               style={styles.flatlistStyle}
               data={recipesFromApi}
@@ -109,16 +115,38 @@ export default function Category2(props) {
                 );
               }}
             />
+          ) : (
+            <ActivityIndicator
+              size={'large'}
+              color={colors.themeColor}
+              style={{
+                display: 'flex',
+                alignSelf: 'center',
+                marginTop: 20,
+              }}
+            />
           )}
-          <TouchableOpacity activeOpacity={1} onPress={() => handleViewMore()}>
-            <View style={styles.viewMoreContainer}>
+
+          {recipesFromApi != null ? (
+            <TouchableOpacity
+              activeOpacity={1}
+              onPress={() => handleViewMore()}>
               {moreRecipesLoading ? (
-                <ActivityIndicator />
+                <ActivityIndicator
+                  size={'large'}
+                  color={colors.themeColor}
+                  style={{
+                    display: 'flex',
+                    alignSelf: 'center',
+                  }}
+                />
               ) : (
-                <Text style={{fontSize: 15}}> View More</Text>
+                <View style={styles.viewMoreContainer}>
+                  <Text style={{fontSize: 15}}> View More</Text>
+                </View>
               )}
-            </View>
-          </TouchableOpacity>
+            </TouchableOpacity>
+          ) : null}
         </ScrollView>
       </View>
     </View>
@@ -147,12 +175,13 @@ const styles = StyleSheet.create({
   flatlistStyle: {marginVertical: 0, marginLeft: 1},
   flatlistParentContainer: {
     height: 'auto',
-    width: 190,
+    width: wp('47.5%'),
     marginBottom: 20,
+    paddingHorizontal: 4,
   },
   flatlistImage: {
-    width: 180,
-    height: 180,
+    width: '100%',
+    height: hp('25%'),
     borderRadius: 10,
   },
   flatlistTextContainer: {
@@ -174,7 +203,7 @@ const styles = StyleSheet.create({
     borderWidth: 2,
     padding: 10,
     marginBottom: 15,
-    borderColor: '#f4511e',
+    borderColor: colors.themeColor,
     borderRadius: 20,
   },
 });

@@ -13,11 +13,18 @@ import {
   TextInput,
   ScrollView,
   SafeAreaView,
+  StyleSheet,
 } from 'react-native';
 import axios from 'axios';
 import SearchFixed from '../search/SearchFixed';
 import * as MiscActions from '../../store/actions/MiscActions';
 import getRecipeFromApi from '../functions/GetRecipeFromApi';
+//
+import {
+  widthPercentageToDP as wp,
+  heightPercentageToDP as hp,
+} from 'react-native-responsive-screen';
+import colors from '../../assets/constants/Colors';
 
 export default function Category1(props) {
   console.log('Category 1 props  :>> ', props);
@@ -90,10 +97,11 @@ export default function Category1(props) {
     <View style={styles.mainContainer}>
       <View style={styles.parentContainer}>
         <ScrollView
+          showsVerticalScrollIndicator={false}
           keyboardShouldPersistTaps={'handled'}
           contentContainerStyle={styles.scrollViewContentContainerStyle}>
           <SearchFixed renderDetails={sendSearchObject} showFixedText={true} />
-          {recipesFromApi && (
+          {recipesFromApi && recipesFromApi != null ? (
             <FlatList
               style={styles.flatlistStyle}
               data={recipesFromApi}
@@ -106,7 +114,7 @@ export default function Category1(props) {
                     <TouchableOpacity
                       activeOpacity={1}
                       onPress={() => goToDetailsScreen(item)}>
-                      <ImageBackground
+                      <Image
                         source={{uri: `${baseUrlSpoonacular + item.image}`}}
                         style={styles.flatlistImage}
                       />
@@ -119,24 +127,45 @@ export default function Category1(props) {
                 );
               }}
             />
+          ) : (
+            <ActivityIndicator
+              size={'large'}
+              color={colors.themeColor}
+              style={{
+                display: 'flex',
+                alignSelf: 'center',
+                marginTop: 20,
+              }}
+            />
           )}
 
-          <TouchableOpacity activeOpacity={1} onPress={() => handleViewMore()}>
-            <View style={styles.viewMoreContainer}>
+          {recipesFromApi != null ? (
+            <TouchableOpacity
+              activeOpacity={1}
+              onPress={() => handleViewMore()}>
               {moreRecipesLoading ? (
-                <ActivityIndicator />
+                <ActivityIndicator
+                  size={'large'}
+                  color={colors.themeColor}
+                  style={{
+                    display: 'flex',
+                    alignSelf: 'center',
+                  }}
+                />
               ) : (
-                <Text style={{fontSize: 15}}> View More</Text>
+                <View style={styles.viewMoreContainer}>
+                  <Text style={{fontSize: 15}}> View More</Text>
+                </View>
               )}
-            </View>
-          </TouchableOpacity>
+            </TouchableOpacity>
+          ) : null}
         </ScrollView>
       </View>
     </View>
   );
 }
 
-const styles = {
+const styles = StyleSheet.create({
   mainContainer: {
     justifyContent: 'center',
     alignItems: 'center',
@@ -149,15 +178,23 @@ const styles = {
     width: '95%',
     paddingVertical: 5,
   },
+  scrollViewContentContainerStyle: {
+    width: '100%',
+    display: 'flex',
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
   flatlistStyle: {marginVertical: 0, marginLeft: 1},
   flatlistParentContainer: {
     height: 'auto',
-    width: 190,
+    width: wp('47.5%'),
     marginBottom: 20,
+    paddingHorizontal: 4,
   },
   flatlistImage: {
-    width: 180,
-    height: 180,
+    // width: wp('50%'),
+    width: '100%',
+    height: hp('25%'),
     borderRadius: 10,
   },
   flatlistTextContainer: {
@@ -175,17 +212,12 @@ const styles = {
     fontSize: 15,
     paddingHorizontal: 5,
   },
-  scrollViewContentContainerStyle: {
-    width: '100%',
-    display: 'flex',
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
+
   viewMoreContainer: {
     borderWidth: 2,
     padding: 10,
     marginBottom: 15,
-    borderColor: '#f4511e',
+    borderColor: colors.themeColor,
     borderRadius: 20,
   },
-};
+});

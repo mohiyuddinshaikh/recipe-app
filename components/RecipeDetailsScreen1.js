@@ -25,6 +25,7 @@ import {TouchableOpacity} from 'react-native-gesture-handler';
 import AsyncStorage from '@react-native-community/async-storage';
 import {updateUserData, removeRecipe} from '../api/user/UserOperations.api';
 import {useIsFocused} from '@react-navigation/native';
+import colors from '../assets/constants/Colors';
 
 export default function RecipeDetailsScreen1({navigation, route}) {
   const dispatch = useDispatch();
@@ -456,7 +457,7 @@ const styles = StyleSheet.create({
     borderWidth: 2,
     padding: 10,
     marginBottom: 15,
-    borderColor: '#f4511e',
+    borderColor: colors.themeColor,
     borderRadius: 20,
   },
   randomRecipeContainer: {

@@ -36,7 +36,9 @@ export const loginApi = async data => {
     return response;
   } catch (error) {
     console.log(error);
+    console.log('error.response :>> ', error.response);
     console.log(error.status);
+    console.log(error.message);
 
     return error.response;
   }

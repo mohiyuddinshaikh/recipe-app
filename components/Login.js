@@ -10,6 +10,7 @@ import {
   Image,
   TextInput,
   ActivityIndicator,
+  KeyboardAvoidingView,
 } from 'react-native';
 import {useDispatch, useSelector} from 'react-redux';
 import * as Actions from '../store/actions/SaveAction';
@@ -21,12 +22,20 @@ import {
 } from '../api/user/Signup.api';
 import {getAuthToken} from '../api/storage/storage';
 import AsyncStorage from '@react-native-community/async-storage';
+import alertComponent from './functions/Alert';
+import colors from '../assets/constants/Colors';
 
-export default function Login() {
+export default function Login({navigation, route}) {
   const dispatch = useDispatch();
   const [showLoader, setShowLoader] = useState(true);
+  const [loginClickedLoader, setLoginClickedLoader] = useState(false);
   const [email, setEmail] = useState();
   const [password, setPassword] = useState();
+  const [showCredit, setShowCredit] = useState(true);
+
+  console.log('navigation :>> ', navigation);
+  console.log('route :>> ', route);
+
   useEffect(() => {
     checkForToken();
   }, []);
@@ -58,27 +67,37 @@ export default function Login() {
   };
 
   const handleLogin = async () => {
+    setLoginClickedLoader(true);
     const data = {
       email: email,
       password: password,
     };
     const response = await loginApi(data);
-    console.log('response', response);
-    if (response.status === 200) {
-      handleSuccess(response);
-      // const shuruKar = async () => {
-      //   await AsyncStorage.setItem('jwtSecret', response.token);
-      // };
 
-      // dispatch(MiscActions.setIsLoggedIn(true));
-    }
-    if (response.status === 401) {
-      handleError(response.status);
-    }
-    if (response.status === 404) {
-      handleError(response.status);
+    console.log('response', response);
+
+    if (response) {
+      if (response.status === 200) {
+        handleSuccess(response);
+      }
+      if (response.status === 400) {
+        alertComponent({subheading: response.data.message});
+      }
+      if (response.status === 401) {
+        handleError(response.status);
+        setLoginClickedLoader(false);
+      }
+      if (response.status === 404) {
+        handleError(response.status);
+        setLoginClickedLoader(false);
+      } else {
+        console.log('Inside else block');
+        console.log(response.status);
+        setLoginClickedLoader(false);
+      }
     } else {
-      console.log(response.status);
+      alertComponent({subheading: 'Please check your internet connection '});
+      setLoginClickedLoader(false);
     }
   };
 
@@ -86,6 +105,7 @@ export default function Login() {
     try {
       await AsyncStorage.setItem('jwtSecret', response.data.token);
       dispatch(MiscActions.setIsLoggedIn(true));
+      setLoginClickedLoader(false);
     } catch (error) {
       console.log('error', error);
     }
@@ -108,7 +128,7 @@ export default function Login() {
     if (status === 404) {
       Alert.alert(
         'Alert',
-        'Incorrect email',
+        'Invalid email',
         [
           {
             text: 'Ok',
@@ -119,56 +139,100 @@ export default function Login() {
       );
     }
   };
+  const [changeColor1, setChangeColor1] = useState(false);
+  const [changeColor2, setChangeColor2] = useState(false);
 
   return (
     <View style={styles.parentContainer}>
-      <View style={styles.wrapperContainer}>
-        <Image
-          source={require('../assets/images/chef.jpg')}
-          style={styles.image}
-        />
-        {showLoader ? (
+      <Image
+        source={require('../assets/images/chef.jpg')}
+        style={styles.image}
+      />
+      {showLoader ? (
+        <View style={styles.loading}>
           <ActivityIndicator
             size="large"
-            color="#0000ff"
+            color={colors.themeColor}
             animating={showLoader}
           />
-        ) : null}
+        </View>
+      ) : null}
+      <View style={styles.textInputContainer}>
+        <Text style={styles.inputLabelText}>Email</Text>
+        <TextInput
+          style={!changeColor1 ? styles.inputBox : styles.inputBoxActive}
+          onChangeText={text => setEmail(text)}
+          placeholder="Enter Email"
+          onFocus={() => {
+            setShowCredit(false);
+            setChangeColor1(true);
+          }}
+          onBlur={() => {
+            setShowCredit(true);
+            setChangeColor1(false);
+          }}
+        />
+        <Text style={styles.inputLabelText}>Password</Text>
+        <TextInput
+          style={!changeColor2 ? styles.inputBox : styles.inputBoxActive}
+          onChangeText={text => setPassword(text)}
+          placeholder="Enter Password"
+          onFocus={() => {
+            setShowCredit(false);
+            setChangeColor2(true);
+          }}
+          onBlur={() => {
+            setShowCredit(true);
+            setChangeColor2(false);
+          }}
+        />
 
-        <View style={styles.textInputContainer}>
-          <TextInput
-            style={styles.inputBox}
-            onChangeText={text => setEmail(text)}
-            placeholder="Enter Email"
-          />
-          <TextInput
-            style={styles.inputBox}
-            onChangeText={text => setPassword(text)}
-            placeholder="Enter Password"
-          />
-
+        <View
+          style={{
+            width: '100%',
+          }}>
           <TouchableOpacity
             activeOpacity={1}
             onPress={() => {
-              handleLogin();
+              showLoader ? null : handleLogin();
             }}>
             <View style={styles.loginTextContainer}>
-              <Text style={{color: 'white'}}>LOGIN</Text>
+              {loginClickedLoader ? (
+                <ActivityIndicator color="white" />
+              ) : (
+                <Text style={{color: 'white'}}>LOGIN</Text>
+              )}
             </View>
           </TouchableOpacity>
+        </View>
 
-          <Text style={styles.notAMemberText}>
-            Not a member?<Text> </Text>
-            <Text
-              onPress={() => {
-                dispatch(MiscActions.showLoginScreen(false));
-              }}
-              style={{textDecorationLine: 'underline'}}>
-              Signup
-            </Text>
+        <Text style={styles.notAMemberText}>
+          Not a member?<Text> </Text>
+          <Text
+            onPress={() => {
+              showLoader ? null : dispatch(MiscActions.showLoginScreen(false));
+            }}
+            style={{textDecorationLine: 'underline'}}>
+            Signup
+          </Text>
+        </Text>
+      </View>
+
+      {showCredit ? (
+        <View
+          style={{
+            position: 'absolute',
+            bottom: 0,
+            width: '100%',
+            backgroundColor: colors.themeColor,
+            display: 'flex',
+            alignItems: 'center',
+          }}>
+          <Text style={{fontSize: 14, color: colors.white, paddingVertical: 3}}>
+            Developed with &#x2665; by Mohiyuddin Shaikh
           </Text>
         </View>
-      </View>
+      ) : null}
     </View>
   );
 }
@@ -180,37 +244,53 @@ const styles = StyleSheet.create({
     display: 'flex',
     justifyContent: 'center',
     alignItems: 'center',
-    backgroundColor: '#dff9fb',
+    // backgroundColor: '#dff9fb',
   },
   inputBox: {
     height: 50,
     borderColor: 'gray',
     borderWidth: 1,
-    width: '85%',
-    marginTop: 10,
+    width: '100%',
+    marginTop: 5,
     borderRadius: 5,
     paddingHorizontal: 10,
   },
-  wrapperContainer: {
+  inputBoxActive: {
+    height: 50,
+    borderColor: colors.themeColor,
+    borderWidth: 2,
     width: '100%',
-    height: '100%',
-    marginTop: 60,
-    display: 'flex',
-    alignItems: 'center',
+    marginTop: 5,
+    borderRadius: 5,
+    paddingHorizontal: 10,
   },
+
   image: {width: '80%', height: '40%'},
   textInputContainer: {
     display: 'flex',
     alignItems: 'center',
-    width: '100%',
-    marginTop: '5%',
+    width: '85%',
+    marginTop: '1%',
   },
   loginTextContainer: {
-    paddingVertical: 14,
-    paddingHorizontal: 25,
-    backgroundColor: '#1a8cff',
+    paddingVertical: 10,
+    paddingHorizontal: 20,
+    backgroundColor: colors.themeColor,
     marginTop: '5%',
     borderRadius: 10,
+    display: 'flex',
+    alignItems: 'center',
   },
   notAMemberText: {marginTop: 10, fontSize: 15},
+  inputLabelText: {display: 'flex', alignSelf: 'flex-start', marginTop: 10},
+  loading: {
+    position: 'absolute',
+    left: 0,
+    right: 0,
+    top: 0,
+    bottom: 0,
+    alignItems: 'center',
+    justifyContent: 'center',
+    backgroundColor: '#F5FCFF88',
+  },
 });

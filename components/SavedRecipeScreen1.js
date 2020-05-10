@@ -19,6 +19,7 @@ import AsyncStorage from '@react-native-community/async-storage';
 import spoonacularApiKey from '../assets/constants/SpoonacularApiKey';
 import {removeRecipe} from '../api/user/UserOperations.api';
 import Icon from 'react-native-vector-icons/FontAwesome';
+import colors from '../assets/constants/Colors';
 
 export default function SavedRecipeScreen1({navigation, route}) {
   const dispatch = useDispatch();
@@ -31,7 +32,9 @@ export default function SavedRecipeScreen1({navigation, route}) {
     console.log('item', item);
     Alert.alert(
       'Delete Recipe',
-      `Are you sure you want to remove "${item.recipeName}" from saved recipes?`,
+      `Are you sure you want to remove "${
+        item.recipeName
+      }" from saved recipes?`,
       [
         {
           text: 'No',
@@ -112,7 +115,8 @@ export default function SavedRecipeScreen1({navigation, route}) {
                 flexDirection: 'row',
                 // backgroundColor: '#b6d9fc',
                 marginTop: 2,
-                borderWidth: 1,
+                borderWidth: 2,
+                borderColor: colors.themeColor,
                 borderRadius: 5,
                 marginBottom: 5,
                 padding: 9,
