@@ -148,20 +148,20 @@ export default function SearchFixed(props) {
         ) : null}
       </View>
 
-      <View style={styles.searchIcon}>
+      {/* <View style={styles.searchIcon}>
         <Icon
           name={'search'}
           size={22}
           color={'#111'}
           onPress={() => console.log('Search was presssed')}
         />
-      </View>
+      </View> */}
 
       {autoCompleteList && autoCompleteList.length != 0 && (
         <View
           style={{
             width: '100%',
-            backgroundColor: '#2C3A47',
+            backgroundColor: colors.themeColor,
             borderRadius: 10,
             marginTop: 10,
             borderWidth: 1,
@@ -212,7 +212,7 @@ const styles = StyleSheet.create({
     height: 45,
     borderColor: 'gray',
     borderWidth: 1,
-    width: '91%',
+    width: '100%',
     marginTop: 10,
     borderRadius: 25,
     flexDirection: 'row',
@@ -224,7 +224,7 @@ const styles = StyleSheet.create({
     height: 45,
     borderColor: colors.themeColor,
     borderWidth: 2,
-    width: '91%',
+    width: '100%',
     marginTop: 10,
     borderRadius: 25,
     flexDirection: 'row',
