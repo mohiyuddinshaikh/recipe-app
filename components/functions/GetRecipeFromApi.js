@@ -38,12 +38,14 @@ const getUrl = props => {
 };
 
 const getRecursionStatus = props => {
+  console.log('RecursionStatusKeProps :>> ', props);
   if (props.hasOwnProperty('hasExpired')) {
     return {hasExpired: true, keyId: props.hasExpired};
   } else return {hasExpired: false};
 };
 
 const getRecipeFromApi = async props => {
+  console.log('props :>> ', props);
   let viewMoreCount = props.viewMoreCount;
   let recursionCall = await getRecursionStatus(props);
   let spoonacularKeyObject =

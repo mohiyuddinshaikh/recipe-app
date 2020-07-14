@@ -2,15 +2,14 @@ import React, {useState, useEffect} from 'react';
 import {
   View,
   Text,
-  FlatList,
-  Button,
   ImageBackground,
-  Platform,
   Image,
   ScrollView,
   ToastAndroid,
   Alert,
   StyleSheet,
+  Button,
+  ActivityIndicator,
 } from 'react-native';
 import {Colors} from 'react-native/Libraries/NewAppScreen';
 import {useDispatch, useSelector} from 'react-redux';
@@ -21,20 +20,24 @@ import Icon from 'react-native-vector-icons/FontAwesome';
 import axios from 'axios';
 import spoonacularApiKey from '../assets/constants/SpoonacularApiKey';
 import {Table, Row, Rows} from 'react-native-table-component';
-import {TouchableOpacity} from 'react-native-gesture-handler';
+import {TouchableOpacity, FlatList} from 'react-native-gesture-handler';
 import AsyncStorage from '@react-native-community/async-storage';
 import {updateUserData, removeRecipe} from '../api/user/UserOperations.api';
-import {useIsFocused} from '@react-navigation/native';
+import {useIsFocused, useFocusEffect} from '@react-navigation/native';
 import colors from '../assets/constants/Colors';
+import {
+  widthPercentageToDP as wp,
+  heightPercentageToDP as hp,
+} from 'react-native-responsive-screen';
+import cuisinePictureArray from './extras/cuisinePictureArray';
+import getRecipe from './functions/getRecipe';
 
 export default function RecipeDetailsScreen1({navigation, route}) {
   const dispatch = useDispatch();
-  // const recipeDataInStore = useSelector(state => state.saveReducer.recipes);
   let userDataInStore = useSelector(state => state.userReducer.user);
-  const isCallerSavedScreen = useSelector(
-    state => state.miscReducer.isCallerSavedScreen,
-  );
-  const [ingredientsFromApi, setIngredientsFromApi] = useState();
+  let miscReducerState = useSelector(state => state.miscReducer);
+
+  const [ingredientsFromApi, setIngredientsFromApi] = useState(null);
   const [recipeDetailInformation, setRecipeDetailInformation] = useState();
   console.log(route.params);
   console.log('route', route);
@@ -45,14 +48,20 @@ export default function RecipeDetailsScreen1({navigation, route}) {
   let itemImagePath = itemName.toString().toLowerCase();
   console.log(itemImagePath);
   const [isRecipeSaved, setIsRecipeSaved] = useState(false);
+  const [ingredientsLoader, setIngredientsLoader] = useState(true);
 
-  console.log('isCallerSavedScreen', isCallerSavedScreen);
+  // useFocusEffect(() => {
+  //   console.log('FOCUSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSS');
+  //   console.log('itemName :>> ', itemName);
+
+  // }, []);
 
   useEffect(() => {
     console.log('Use effect ran');
     checkIfRecipeSaved();
     getRecipeIngredients();
     getDetailedRecipeInformation();
+    // getSimilarRecipes();
     navigation.setOptions({title: itemName});
     dispatch(MiscActions.showSearchBar(false));
   }, []);
@@ -70,40 +79,59 @@ export default function RecipeDetailsScreen1({navigation, route}) {
     }
   };
 
+  const [similarRecipes, setSimilarRecipes] = useState();
+  console.log('similarRecipes :>> ', similarRecipes);
+
   const getRecipeIngredients = async () => {
-    let spoonacularKeyObject = await spoonacularApiKey({expired: false});
-    let spoonacularKey = spoonacularKeyObject.key;
-    const response = await axios.get(
-      `https://api.spoonacular.com/recipes/${itemId}/ingredientWidget.json?apiKey=${spoonacularKey}`,
-    );
-    console.log(response);
-    if (response.status == 200) {
-      setIngredientsFromApi(response.data.ingredients);
+    let data = {
+      category: 5,
+      spoonacularKeyIndex: miscReducerState.spoonacularKeyIndex,
+      itemId: itemId,
+    };
+    const response = await getRecipe(data);
+    console.log('response in details screen :>> ', response);
+    setIngredientsFromApi(response.response.data.ingredients);
+    setIngredientsLoader(false);
+    if (response.didIncrement) {
+      console.log('Did increment');
+      dispatch(MiscActions.increaseSpoonacularKeyIndex());
     }
-    if (response.status == 402) {
-      let responseSpoonacularObject = await spoonacularApiKey({
-        expired: true,
-        id: spoonacularKeyObject.id,
-      });
-      const response = await axios.get(
-        `https://api.spoonacular.com/recipes/${itemId}/ingredientWidget.json?apiKey=${
-          responseSpoonacularObject.key
-        }`,
-      );
-      console.log(response);
-      if (response.status == 200) {
-        setIngredientsFromApi(response.data.ingredients);
-      } else {
-        ToastAndroid.showWithGravityAndOffset(
-          'Something went wrong, Please try again !',
-          ToastAndroid.LONG,
-          ToastAndroid.BOTTOM,
-          25,
-          50,
-        );
-        navigation.navigate('HomeScreen1');
-      }
-    }
+
+    // let spoonacularKeyObject = await spoonacularApiKey({expired: false});
+    // let spoonacularKey = spoonacularKeyObject.key;
+    // const response = await axios.get(
+    //   `https://api.spoonacular.com/recipes/${itemId}/ingredientWidget.json?apiKey=${spoonacularKey}`,
+    // );
+    // console.log(response);
+    // if (response.status == 200) {
+    //   setIngredientsFromApi(response.data.ingredients);
+    //   setIngredientsLoader(false);
+    // }
+    // if (response.status == 402) {
+    //   let responseSpoonacularObject = await spoonacularApiKey({
+    //     expired: true,
+    //     id: spoonacularKeyObject.id,
+    //   });
+    //   const response = await axios.get(
+    //     `https://api.spoonacular.com/recipes/${itemId}/ingredientWidget.json?apiKey=${
+    //       responseSpoonacularObject.key
+    //     }`,
+    //   );
+    //   console.log(response);
+    //   if (response.status == 200) {
+    //     setIngredientsFromApi(response.data.ingredients);
+    //     setIngredientsLoader(false);
+    //   } else {
+    //     ToastAndroid.showWithGravityAndOffset(
+    //       'Something went wrong, Please try again !',
+    //       ToastAndroid.LONG,
+    //       ToastAndroid.BOTTOM,
+    //       25,
+    //       50,
+    //     );
+    //     navigation.navigate('HomeScreen1');
+    //   }
+    // }
   };
 
   const getDetailedRecipeInformation = async () => {
@@ -141,6 +169,40 @@ export default function RecipeDetailsScreen1({navigation, route}) {
       }
     }
   };
+
+  const getSimilarRecipes = async () => {
+    let spoonacularKeyObject = await spoonacularApiKey({expired: false});
+    let spoonacularKey = spoonacularKeyObject.key;
+    const response = await axios.get(
+      `https://api.spoonacular.com/recipes/${itemId}/similar?apiKey=${spoonacularKey}&number=5`,
+    );
+    console.log(response);
+    setSimilarRecipes(response.data);
+    detailedInformationForSimilarRecipes(response.data);
+  };
+
+  const [
+    detailedSimilarRecipesArray,
+    setDetailedSimilarRecipesArray,
+  ] = useState([]);
+
+  const detailedInformationForSimilarRecipes = async similarRecipes => {
+    let spoonacularKeyObject = await spoonacularApiKey({expired: false});
+    let spoonacularKey = spoonacularKeyObject.key;
+    let arr = [];
+    similarRecipes.map(async item => {
+      const response = await axios.get(
+        `https://api.spoonacular.com/recipes/${
+          item.id
+        }/information?apiKey=${spoonacularKey}`,
+      );
+      arr = [...arr, response.data];
+      setDetailedSimilarRecipesArray(arr);
+    });
+  };
+
+  // console.log('recipeDetailedInformation :>> ', recipeDetailInformation);
+  console.log('detailedSimilarRecipesArray :>> ', detailedSimilarRecipesArray);
 
   const renderIngredientTable = () => {
     return (
@@ -217,41 +279,54 @@ export default function RecipeDetailsScreen1({navigation, route}) {
   };
 
   const getInstructions = async () => {
-    let spoonacularKeyObject = await spoonacularApiKey({expired: false});
-    let spoonacularKey = spoonacularKeyObject.key;
-    const response = await axios.get(
-      `https://api.spoonacular.com/recipes/${itemId}/analyzedInstructions?apiKey=${spoonacularKey}`,
-    );
-    console.log('response', response);
-    if (response.status == 200) {
-      console.log('response.data[0].steps', response.data[0].steps);
-      return response.data[0].steps;
+    let data = {
+      category: 6,
+      spoonacularKeyIndex: miscReducerState.spoonacularKeyIndex,
+      itemId: itemId,
+    };
+    const response = await getRecipe(data);
+    if (response.didIncrement) {
+      console.log('Did increment');
+      dispatch(MiscActions.increaseSpoonacularKeyIndex());
     }
-    if (response.status == 402) {
-      let responseSpoonacularObject = await spoonacularApiKey({
-        expired: true,
-        id: spoonacularKeyObject.id,
-      });
-      const response = await axios.get(
-        `https://api.spoonacular.com/recipes/${itemId}/analyzedInstructions?apiKey=${
-          responseSpoonacularObject.key
-        }`,
-      );
-      console.log(response);
-      if (response.status == 200) {
-        console.log('response.data[0].steps', response.data[0].steps);
-        return response.data[0].steps;
-      } else {
-        ToastAndroid.showWithGravityAndOffset(
-          'Something went wrong, Please try again !',
-          ToastAndroid.LONG,
-          ToastAndroid.BOTTOM,
-          25,
-          50,
-        );
-        navigation.navigate('HomeScreen1');
-      }
-    }
+    return response.response.data[0].steps;
+
+    // //
+    // let spoonacularKeyObject = await spoonacularApiKey({expired: false});
+    // let spoonacularKey = spoonacularKeyObject.key;
+    // const response = await axios.get(
+    //   `https://api.spoonacular.com/recipes/${itemId}/analyzedInstructions?apiKey=${spoonacularKey}`,
+    // );
+    // console.log('response', response);
+    // if (response.status == 200) {
+    //   console.log('response.data[0].steps', response.data[0].steps);
+    //   return response.data[0].steps;
+    // }
+    // if (response.status == 402) {
+    //   let responseSpoonacularObject = await spoonacularApiKey({
+    //     expired: true,
+    //     id: spoonacularKeyObject.id,
+    //   });
+    //   const response = await axios.get(
+    //     `https://api.spoonacular.com/recipes/${itemId}/analyzedInstructions?apiKey=${
+    //       responseSpoonacularObject.key
+    //     }`,
+    //   );
+    //   console.log(response);
+    //   if (response.status == 200) {
+    //     console.log('response.data[0].steps', response.data[0].steps);
+    //     return response.data[0].steps;
+    //   } else {
+    //     ToastAndroid.showWithGravityAndOffset(
+    //       'Something went wrong, Please try again !',
+    //       ToastAndroid.LONG,
+    //       ToastAndroid.BOTTOM,
+    //       25,
+    //       50,
+    //     );
+    //     navigation.navigate('HomeScreen1');
+    //   }
+    // }
 
     // const response = await axios.get(
     //   `https://api.spoonacular.com/recipes/${itemId}/analyzedInstructions?apiKey=${spoonacularApiKey}`,
@@ -309,6 +384,7 @@ export default function RecipeDetailsScreen1({navigation, route}) {
     <View style={styles.mainContainer}>
       <View style={styles.parentContainer}>
         <ScrollView
+          showsVerticalScrollIndicator={false}
           keyboardShouldPersistTaps={'handled'}
           style={{width: '100%'}}>
           <View style={styles.randomRecipeContainer}>
@@ -371,7 +447,7 @@ export default function RecipeDetailsScreen1({navigation, route}) {
               <TouchableOpacity
                 style={{
                   width: '100%',
-                  backgroundColor: 'black',
+                  backgroundColor: colors.themeColor,
                   paddingVertical: 10,
                 }}
                 onPress={() => {
@@ -400,8 +476,79 @@ export default function RecipeDetailsScreen1({navigation, route}) {
             <Text style={{fontSize: 20, marginBottom: 20, marginTop: 20}}>
               List Of Ingredients :
             </Text>
-            {renderIngredientTable()}
+            {ingredientsLoader ? (
+              <ActivityIndicator
+                size="large"
+                color={colors.themeColor}
+                style={{marginBottom: 20}}
+              />
+            ) : (
+              renderIngredientTable()
+            )}
           </View>
+
+          {ingredientsLoader ? null : (
+            <TouchableOpacity
+              style={{
+                width: '100%',
+                backgroundColor: colors.themeColor,
+                paddingVertical: 10,
+                marginBottom: 15,
+              }}
+              onPress={() => {
+                let data = {
+                  name: itemName,
+                  id: itemId,
+                };
+                navigation.navigate('RecipeInstructionsScreen', data);
+              }}>
+              <Text style={{textAlign: 'center', color: 'white', fontSize: 17}}>
+                Read Instructions
+              </Text>
+            </TouchableOpacity>
+          )}
+
+          {similarRecipes ? (
+            <Text
+              style={{
+                fontSize: 20,
+                color: colors.themeColor,
+                fontWeight: 'bold',
+                marginLeft: 5,
+              }}>
+              Similar Recipes
+            </Text>
+          ) : null}
+
+          <FlatList
+            style={{marginVertical: 10}}
+            horizontal={true}
+            data={detailedSimilarRecipesArray}
+            keyExtractor={item => item.id}
+            renderItem={({item, index}) => {
+              return (
+                <TouchableOpacity
+                  activeOpacity={1}
+                  onPress={() => handleFlatlistPress(item)}>
+                  <View style={styles.similarContainer}>
+                    <Image
+                      source={{uri: item.image}}
+                      style={styles.similarImage}
+                    />
+                    <Text
+                      style={{
+                        display: 'flex',
+                        flexDirection: 'row',
+                        flexWrap: 'wrap',
+                        textAlign: 'center',
+                      }}>
+                      {item.title}
+                    </Text>
+                  </View>
+                </TouchableOpacity>
+              );
+            }}
+          />
         </ScrollView>
       </View>
     </View>
@@ -525,7 +672,7 @@ const styles = StyleSheet.create({
     paddingTop: 30,
     backgroundColor: '#fff',
   },
-  head: {height: 40, backgroundColor: '#f1f8ff'},
+  head: {height: hp('8%')},
   text: {margin: 6},
   buttonContainer: {
     width: '100%',
@@ -548,5 +695,18 @@ const styles = StyleSheet.create({
     display: 'flex',
     justifyContent: 'center',
     alignItems: 'center',
+  },
+  similarContainer: {
+    width: wp('40%'),
+    marginHorizontal: 5,
+    marginVertical: 5,
+    display: 'flex',
+    justifyContent: 'center',
+    alignItems: 'center',
+    padding: 3,
+  },
+  similarImage: {
+    width: wp('40%'),
+    height: hp('18%'),
   },
 });

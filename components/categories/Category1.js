@@ -25,12 +25,15 @@ import {
   heightPercentageToDP as hp,
 } from 'react-native-responsive-screen';
 import colors from '../../assets/constants/Colors';
+import getRecipe from '../functions/getRecipe';
 
 export default function Category1(props) {
   console.log('Category 1 props  :>> ', props);
 
   let dispatch = useDispatch();
   let viewMoreCount = useSelector(state => state.miscReducer.viewMoreCount);
+  let miscReducerState = useSelector(state => state.miscReducer);
+
   const [recipesFromApi, setRecipesFromApi] = useState(null);
   const [baseUrlSpoonacular, setBaseUrlSpoonacular] = useState();
   const [moreRecipesLoading, setMoreRecipesLoading] = useState(false);
@@ -51,14 +54,21 @@ export default function Category1(props) {
   }, [viewMoreCount]);
 
   const fetchRecipeFromApi = async () => {
-    let propsToSend = {...props, viewMoreCount};
-    let response = await getRecipeFromApi(propsToSend);
+    console.log('FETCHHHH');
+    let propsToSend = {
+      ...props,
+      viewMoreCount,
+      spoonacularKeyIndex: miscReducerState.spoonacularKeyIndex,
+    };
+    // let response = await getRecipeFromApi(propsToSend);
+    let response = await getRecipe(propsToSend);
+
     if (viewMoreCount == 0) {
-      setRecipesFromApi(response.data.results);
+      setRecipesFromApi(response.response.data.results);
     }
-    setBaseUrlSpoonacular(response.data.baseUri);
+    setBaseUrlSpoonacular(response.response.data.baseUri);
     if (viewMoreCount > 0) {
-      viewMoreRecipes.push(response.data.results);
+      viewMoreRecipes.push(response.response.data.results);
       addExtra();
     }
   };

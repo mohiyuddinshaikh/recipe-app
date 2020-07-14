@@ -4,12 +4,13 @@ const initState = {
   showLoginScreen: true,
   showSearchBar: false,
   viewMoreCount: 0,
+  isSavedScreenActive: false,
+  spoonacularKeyIndex: 0,
 };
 
 const miscReducer = (state = initState, action) => {
   console.log(action.data);
   console.log(action);
-  console.log('INSIDE MISC REDUCER');
 
   if (action.type === 'SET_IS_CALLER_SAVED_SCREEN') {
     console.log('reducer ka state', state);
@@ -57,6 +58,36 @@ const miscReducer = (state = initState, action) => {
       viewMoreCount: action.payload,
     };
     console.log('reducer state after saving', state);
+    return state;
+  }
+
+  if (action.type === 'SAVED_SCREEN_ACTIVE') {
+    console.log('reducer ka state', state);
+    state = {
+      ...state,
+      isSavedScreenActive: action.payload,
+    };
+    console.log('reducer state after saving', state);
+    return state;
+  }
+
+  if (action.type === 'SPOONACULAR_KEY_INDEX') {
+    state = {
+      ...state,
+      spoonacularKeyIndex: state.spoonacularKeyIndex + 1,
+    };
+    console.log('reducer state after saving', state);
+
+    return state;
+  }
+
+  if (action.type === 'RESET_SPOONACULAR_KEY_INDEX') {
+    state = {
+      ...state,
+      spoonacularKeyIndex: 0,
+    };
+    console.log('reducer state after saving', state);
+
     return state;
   }
 

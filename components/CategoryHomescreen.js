@@ -19,6 +19,7 @@ import Category2 from './categories/Category2';
 import Category3 from './categories/Category3';
 
 // Categories description
+// Category 0 : Random Recipe
 // Category 1 : ItemSpecificCategory : Chicken,Paneer
 // Category 2 : MealSpecificCategory : Breakfast, Lunch, Snack, Soup, Dessert,
 // Category 3 : FoodSpecificCategory : Biryani, Pizza

@@ -9,6 +9,8 @@ import {
   Alert,
   Image,
 } from 'react-native';
+import {useIsFocused, useFocusEffect} from '@react-navigation/native';
+
 import {useDispatch, useSelector} from 'react-redux';
 import * as Actions from '../store/actions/SaveAction';
 import * as MiscActions from '../store/actions/MiscActions';
@@ -19,14 +21,23 @@ import AsyncStorage from '@react-native-community/async-storage';
 import spoonacularApiKey from '../assets/constants/SpoonacularApiKey';
 import {removeRecipe} from '../api/user/UserOperations.api';
 import Icon from 'react-native-vector-icons/FontAwesome';
+import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
+
 import colors from '../assets/constants/Colors';
 
 export default function SavedRecipeScreen1({navigation, route}) {
   const dispatch = useDispatch();
+  // const isFocused = useIsFocused();
+
   const userDataInStore = useSelector(state => state.userReducer.user);
 
-  // const [userDataInStore, setUserDataInStore] = useState();
   console.log('userDataInStore', userDataInStore);
+
+  // useFocusEffect(() => {
+  //   dispatch(MiscActions.setSavedScreenActive(false));
+
+  //   console.log('Running now');
+  // }, []);
 
   const handleRemove = item => {
     console.log('item', item);
@@ -113,9 +124,8 @@ export default function SavedRecipeScreen1({navigation, route}) {
               style={{
                 flex: 1,
                 flexDirection: 'row',
-                // backgroundColor: '#b6d9fc',
                 marginTop: 2,
-                borderWidth: 2,
+                borderWidth: 1,
                 borderColor: colors.themeColor,
                 borderRadius: 5,
                 marginBottom: 5,
@@ -129,71 +139,37 @@ export default function SavedRecipeScreen1({navigation, route}) {
                   width: '18%',
                   flex: 1,
                   flexDirection: 'row',
-                  // alignItems: 'center',
                   justifyContent: 'space-between',
                 }}>
                 <TouchableOpacity
                   activeOpacity={1}
                   onPress={() => {
                     let data = {
-                      // name: item.name,
-                      // itemId: item.id,
-                      // imageUrl: item.imageUrl,
-                      // ingredients: item.ingredients,
                       name: item.recipeName,
                       itemId: item.recipeId,
                       imageUrl: item.imageUrl,
                       ingredients: item.recipeIngredients,
                     };
-                    // dispatch(MiscActions.setIsCallerSavedScreen(true));
+                    // dispatch(MiscActions.setSavedScreenActive(true));
                     navigation.navigate('RecipeDetailsScreen', data);
                   }}>
-                  <Icon name={'eye'} size={27} color={'#00b359'} />
-
-                  {/* <View
-                    style={{
-                      width: 70,
-                      height: 'auto',
-                      backgroundColor: '#1aff8c',
-                      padding: 7,
-                      borderRadius: 5,
-                      marginRight: 5,
-                    }}>
-                    <Text
-                      style={{
-                        color: 'black',
-                        textAlign: 'center',
-                        fontSize: 15,
-                      }}>
-                      View
-                    </Text>
-                  </View> */}
+                  <MaterialCommunityIcons
+                    name={'eye'}
+                    size={25}
+                    color={colors.themeColor}
+                  />
                 </TouchableOpacity>
                 <TouchableOpacity
                   activeOpacity={1}
                   onPress={() => {
                     handleRemove(item);
                   }}>
-                  <Icon name={'trash'} size={27} color={'red'} />
-                  {/* <View
-                    style={{
-                      width: 70,
-                      height: 'auto',
-                      backgroundColor: 'red',
-                      padding: 7,
-                      borderRadius: 5,
-                    }}>
-                    <Text
-                      style={{
-                        color: 'white',
-                        textAlign: 'center',
-                        fontSize: 15,
-                      }}>
-                      Remove
-                    </Text>
-                  </View> */}
+                  <MaterialCommunityIcons
+                    name={'delete'}
+                    size={27}
+                    color="#ff6666"
+                  />
                 </TouchableOpacity>
-                {/* <Text style={styles.text}>hello button</Text> */}
               </View>
             </View>
           )}
@@ -209,27 +185,15 @@ const styles = StyleSheet.create({
   container: {
     margin: 0,
     padding: 10,
-    // backgroundColor: '#8ee48f',
-    backgroundColor: '#dff9fb',
+
     height: '100%',
     display: 'flex',
     justifyContent: 'center',
   },
-  item: {
-    borderWidth: 2,
-    // alignItems: 'flex-start',
-    // justifyContent: 'space-between',
-    borderRadius: 5,
-    marginBottom: 5,
-    flexDirection: 'row',
-    backgroundColor: '#05386b',
-    padding: 9,
-  },
+
   itemText: {
     fontSize: 20,
     marginLeft: 5,
-    // color: '#edf5e1',
     color: 'black',
-    // paddingTop: 3,
   },
 });

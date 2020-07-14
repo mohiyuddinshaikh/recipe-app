@@ -1,4 +1,6 @@
 import React, {useState, useEffect} from 'react';
+import {useDispatch, useSelector} from 'react-redux';
+
 import {
   View,
   Text,
@@ -12,8 +14,11 @@ import {
 } from 'react-native';
 import axios from 'axios';
 import spoonacularApiKey from '../assets/constants/SpoonacularApiKey';
+import getRecipe from './functions/getRecipe';
 
 export default function RecipeInstructionsScreen({navigation, route}) {
+  const dispatch = useDispatch();
+  let miscReducerState = useSelector(state => state.miscReducer);
   const itemName = route.params.name;
   const itemId = route.params.id;
   const [steps, setSteps] = useState();
@@ -25,39 +30,52 @@ export default function RecipeInstructionsScreen({navigation, route}) {
   }, []);
 
   const getInstructions = async () => {
-    let spoonacularKeyObject = await spoonacularApiKey({expired: false});
-    let spoonacularKey = spoonacularKeyObject.key;
-    const response = await axios.get(
-      `https://api.spoonacular.com/recipes/${itemId}/analyzedInstructions?apiKey=${spoonacularKey}`,
-    );
-    console.log('response', response);
-    if (response.status == 200) {
-      setSteps(response.data[0].steps);
+    let data = {
+      category: 6,
+      spoonacularKeyIndex: miscReducerState.spoonacularKeyIndex,
+      itemId: itemId,
+    };
+    const response = await getRecipe(data);
+    setSteps(response.response.data[0].steps);
+    if (response.didIncrement) {
+      console.log('Did increment');
+      dispatch(MiscActions.increaseSpoonacularKeyIndex());
     }
-    if (response.status == 402) {
-      let responseSpoonacularObject = await spoonacularApiKey({
-        expired: true,
-        id: spoonacularKeyObject.id,
-      });
-      const response = await axios.get(
-        `https://api.spoonacular.com/recipes/${itemId}/analyzedInstructions?apiKey=${
-          responseSpoonacularObject.key
-        }`,
-      );
-      console.log(response);
-      if (response.status == 200) {
-        setSteps(response.data[0].steps);
-      } else {
-        ToastAndroid.showWithGravityAndOffset(
-          'Something went wrong, Please try again !',
-          ToastAndroid.LONG,
-          ToastAndroid.BOTTOM,
-          25,
-          50,
-        );
-        navigation.navigate('HomeScreen1');
-      }
-    }
+
+    //
+    // let spoonacularKeyObject = await spoonacularApiKey({expired: false});
+    // let spoonacularKey = spoonacularKeyObject.key;
+    // const response = await axios.get(
+    //   `https://api.spoonacular.com/recipes/${itemId}/analyzedInstructions?apiKey=${spoonacularKey}`,
+    // );
+    // console.log('response', response);
+    // if (response.status == 200) {
+    //   setSteps(response.data[0].steps);
+    // }
+    // if (response.status == 402) {
+    //   let responseSpoonacularObject = await spoonacularApiKey({
+    //     expired: true,
+    //     id: spoonacularKeyObject.id,
+    //   });
+    //   const response = await axios.get(
+    //     `https://api.spoonacular.com/recipes/${itemId}/analyzedInstructions?apiKey=${
+    //       responseSpoonacularObject.key
+    //     }`,
+    //   );
+    //   console.log(response);
+    //   if (response.status == 200) {
+    //     setSteps(response.data[0].steps);
+    //   } else {
+    //     ToastAndroid.showWithGravityAndOffset(
+    //       'Something went wrong, Please try again !',
+    //       ToastAndroid.LONG,
+    //       ToastAndroid.BOTTOM,
+    //       25,
+    //       50,
+    //     );
+    //     navigation.navigate('HomeScreen1');
+    //   }
+    // }
   };
   console.log('steps', steps);
 
@@ -88,9 +106,7 @@ export default function RecipeInstructionsScreen({navigation, route}) {
         width: '100%',
         minHeight: '100%',
         display: 'flex',
-        // justifyContent: 'center',
         alignItems: 'center',
-        backgroundColor: '#dff9fb',
       }}>
       <View style={{display: 'flex', alignItems: 'center'}}>
         <View style={{width: '90%'}}>

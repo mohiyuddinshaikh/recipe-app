@@ -37,39 +37,40 @@ export default function Signup({navigation, route}) {
 
   const checkIfFormValid = async () => {
     console.log('Inside form valid function check');
+    let validName, validEmail, validPassword;
     if (name && email && password) {
       let regExpName = /^[a-zA-Z]+$/;
       let regExpEmail = /^(([^<>()\[\]\\.,;:\s@"]+(\.[^<>()\[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
       let regExpPassword = /[a-zA-Z0-9]/;
       if (name && name.length !== 0) {
-        regExpName.test(name) ? setValName(true) : setValName(false);
+        regExpName.test(name) ? (validName = true) : (validName = false);
       } else {
-        setValName(false);
+        validName = false;
       }
       if (email && email.length !== 0) {
-        regExpEmail.test(email) ? setValEmail(true) : setValEmail(false);
+        regExpEmail.test(email) ? (validEmail = true) : (validEmail = false);
       } else {
-        setValEmail(false);
+        validEmail = false;
       }
       console.log('password :>> ', password);
       console.log('password.length :>> ', password.length);
 
       if (password && password.length !== 0 && password.length > 5) {
         console.log('andar hu');
-        setValPassword(true);
+        validPassword = true;
       } else {
-        setValPassword(false);
+        validPassword = false;
       }
 
-      if (valName && valEmail && valPassword) {
+      if (validName && validEmail && validPassword) {
         console.log('Test 2');
-        if (valName == true && valEmail == true && valPassword == true) {
+        if (validName == true && validEmail == true && validPassword == true) {
           return true;
         } else {
           console.log('Test 3');
-          console.log('valName :>> ', valName);
-          console.log('valEmail :>> ', valEmail);
-          console.log('valPassword :>> ', valPassword);
+          console.log('valName :>> ', validName);
+          console.log('valEmail :>> ', validEmail);
+          console.log('valPassword :>> ', validPassword);
           return false;
         }
       }
@@ -171,7 +172,7 @@ export default function Signup({navigation, route}) {
       />
       <View style={styles.textInputContainer}>
         {/* name,email,password */}
-        <Text style={styles.inputLabelText}>Name</Text>
+        {/* <Text style={styles.inputLabelText}>Name</Text> */}
         <TextInput
           style={
             valName == null || valName == true
@@ -189,7 +190,7 @@ export default function Signup({navigation, route}) {
             setChangeColor1(false);
           }}
         />
-        <Text style={styles.inputLabelText}>Email</Text>
+        {/* <Text style={styles.inputLabelText}>Email</Text> */}
 
         <TextInput
           style={
@@ -208,7 +209,7 @@ export default function Signup({navigation, route}) {
             setChangeColor2(false);
           }}
         />
-        <Text style={styles.inputLabelText}>Password</Text>
+        {/* <Text style={styles.inputLabelText}>Password</Text> */}
 
         <TextInput
           style={
@@ -218,6 +219,7 @@ export default function Signup({navigation, route}) {
                 : styles.inputBoxActive
               : styles.inputBoxError
           }
+          secureTextEntry={true}
           onChangeText={text => setPassword(text)}
           placeholder="Enter Password"
           onFocus={() => {
@@ -296,19 +298,19 @@ const styles = StyleSheet.create({
   },
   inputBox: {
     height: 50,
-    borderColor: 'gray',
-    borderWidth: 1,
+    borderBottomWidth: 1,
+    borderBottomColor: 'gray',
     width: '100%',
-    marginTop: 5,
+    marginTop: 10,
     borderRadius: 5,
     paddingHorizontal: 10,
   },
   inputBoxActive: {
     height: 50,
-    borderColor: colors.themeColor,
-    borderWidth: 2,
+    borderBottomWidth: 2,
+    borderBottomColor: colors.themeColor,
     width: '100%',
-    marginTop: 5,
+    marginTop: 10,
     borderRadius: 5,
     paddingHorizontal: 10,
   },
@@ -329,7 +331,7 @@ const styles = StyleSheet.create({
     display: 'flex',
     alignItems: 'center',
   },
-  image: {width: '80%', height: '40%'},
+  image: {width: 150, height: 150, borderRadius: 200},
   textInputContainer: {
     display: 'flex',
     alignItems: 'center',

@@ -30,6 +30,7 @@ import SearchFixed from './search/SearchFixed';
 import coverPictureArray from '../components/extras/coverPictureArry';
 import cuisinePictureArray from './extras/cuisinePictureArray';
 import getRecipeFromApi from './functions/GetRecipeFromApi';
+import getRecipe from './functions/getRecipe';
 
 import {Dimensions} from 'react-native';
 import {
@@ -37,6 +38,8 @@ import {
   heightPercentageToDP as hp,
 } from 'react-native-responsive-screen';
 import colors from '../assets/constants/Colors';
+import Spoon from '../assets/constants/Spoon';
+import getSpoonacularApiKey from '../assets/constants/Spoon';
 
 const windowWidth = Math.round(Dimensions.get('window').width);
 const windowHeight = Math.round(Dimensions.get('window').height);
@@ -47,6 +50,11 @@ let HomeScreen1 = ({navigation, route}) => {
   const userDataInStore = useSelector(state => state.userReducer.user);
   const showSearchBar = useSelector(state => state.miscReducer.showSearchBar);
   let viewMoreCount = useSelector(state => state.miscReducer.viewMoreCount);
+  let miscReducerState = useSelector(state => state.miscReducer);
+
+  let isSavedScreenActive = useSelector(
+    state => state.miscReducer.isSavedScreenActive,
+  );
   const isFocused = useIsFocused();
 
   const [importedRecipes, setImportedRecipes] = useState(null);
@@ -57,20 +65,39 @@ let HomeScreen1 = ({navigation, route}) => {
   useEffect(() => {
     fetchUserData();
     getRandomRecipe();
-    console.log('windowWidth :>> ', windowWidth);
-    console.log('windowHeight :>> ', windowHeight);
-    console.log('w :>> ', w);
-    console.log('h :>> ', h);
+    // callSpoon();
   }, []);
+
+  const callSpoon = async () => {
+    // const x = await getSpoonacularApiKey(miscReducerState.spoonacularKeyIndex);
+    // console.log('x :>> ', x);
+    let data = {
+      spoonacularKeyIndex: miscReducerState.spoonacularKeyIndex,
+    };
+    getRecipe(data);
+  };
 
   useEffect(() => {
     dispatch(MiscActions.setViewMoreCount(0));
+    console.log('isSavedScreenActive :>> ', isSavedScreenActive);
+    if (isSavedScreenActive == true) {
+      navigation.navigate('Saved');
+    }
   }, [isFocused]);
 
   const getRandomRecipe = async () => {
-    const dataToSend = {data: {category: 0}};
-    const response = await getRecipeFromApi(dataToSend);
-    setRandomRecipe(response.data.recipes[0]);
+    // const dataToSend = {data: {category: 0}};
+    // const response = await getRecipeFromApi(dataToSend);
+    let data = {
+      category: 0,
+      spoonacularKeyIndex: miscReducerState.spoonacularKeyIndex,
+    };
+    const response = await getRecipe(data);
+    setRandomRecipe(response.response.data.recipes[0]);
+    if (response.didIncrement) {
+      console.log('Did increment');
+      dispatch(MiscActions.increaseSpoonacularKeyIndex());
+    }
   };
   console.log('randomRecipe :>> ', randomRecipe);
 
@@ -342,5 +369,15 @@ const styles = StyleSheet.create({
   },
   flatListImage: {width: wp('31%'), height: hp('18%')},
   horizontalFlatlistImage: {width: wp('31%'), height: 140},
+  loading: {
+    position: 'absolute',
+    left: 0,
+    right: 0,
+    top: 0,
+    bottom: 0,
+    alignItems: 'center',
+    justifyContent: 'center',
+    backgroundColor: '#F5FCFF88',
+  },
 });
 export default HomeScreen1;

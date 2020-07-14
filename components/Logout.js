@@ -3,6 +3,7 @@ import {View, Text, StyleSheet, ActivityIndicator} from 'react-native';
 import {useDispatch, useSelector} from 'react-redux';
 import * as MiscActions from '../store/actions/MiscActions';
 import AsyncStorage from '@react-native-community/async-storage';
+import colors from '../assets/constants/Colors';
 
 export default function Logout({navigation}) {
   const dispatch = useDispatch();
@@ -18,7 +19,7 @@ export default function Logout({navigation}) {
         flex: 1,
         justifyContent: 'center',
         alignItems: 'center',
-        backgroundColor: '#dff9fb',
+        backgroundColor: colors.white,
       }}>
       <ActivityIndicator size="small" color="#0000ff" />
     </View>

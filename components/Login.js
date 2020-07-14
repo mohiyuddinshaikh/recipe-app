@@ -24,6 +24,7 @@ import {getAuthToken} from '../api/storage/storage';
 import AsyncStorage from '@react-native-community/async-storage';
 import alertComponent from './functions/Alert';
 import colors from '../assets/constants/Colors';
+import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
 
 export default function Login({navigation, route}) {
   const dispatch = useDispatch();
@@ -158,7 +159,8 @@ export default function Login({navigation, route}) {
         </View>
       ) : null}
       <View style={styles.textInputContainer}>
-        <Text style={styles.inputLabelText}>Email</Text>
+        {/* <Text style={styles.inputLabelText}>Email</Text> */}
+
         <TextInput
           style={!changeColor1 ? styles.inputBox : styles.inputBoxActive}
           onChangeText={text => setEmail(text)}
@@ -172,9 +174,11 @@ export default function Login({navigation, route}) {
             setChangeColor1(false);
           }}
         />
-        <Text style={styles.inputLabelText}>Password</Text>
+
+        {/* <Text style={styles.inputLabelText}>Password</Text> */}
         <TextInput
           style={!changeColor2 ? styles.inputBox : styles.inputBoxActive}
+          secureTextEntry={true}
           onChangeText={text => setPassword(text)}
           placeholder="Enter Password"
           onFocus={() => {
@@ -248,24 +252,26 @@ const styles = StyleSheet.create({
   },
   inputBox: {
     height: 50,
-    borderColor: 'gray',
-    borderWidth: 1,
+    // borderColor: 'gray',
+    // borderWidth: 1,
+    borderBottomColor: 'gray',
+    borderBottomWidth: 1,
     width: '100%',
-    marginTop: 5,
+    marginTop: 10,
     borderRadius: 5,
     paddingHorizontal: 10,
   },
   inputBoxActive: {
     height: 50,
-    borderColor: colors.themeColor,
-    borderWidth: 2,
+    borderBottomColor: colors.themeColor,
+    borderBottomWidth: 2,
     width: '100%',
-    marginTop: 5,
+    marginTop: 10,
     borderRadius: 5,
     paddingHorizontal: 10,
   },
 
-  image: {width: '80%', height: '40%'},
+  image: {width: 150, height: 150, borderRadius: 200},
   textInputContainer: {
     display: 'flex',
     alignItems: 'center',
