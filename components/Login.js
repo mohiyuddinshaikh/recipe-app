@@ -173,6 +173,7 @@ export default function Login({navigation, route}) {
             setShowCredit(true);
             setChangeColor1(false);
           }}
+          editable={!showLoader}
         />
 
         {/* <Text style={styles.inputLabelText}>Password</Text> */}
@@ -189,6 +190,7 @@ export default function Login({navigation, route}) {
             setShowCredit(true);
             setChangeColor2(false);
           }}
+          editable={!showLoader}
         />
 
         <View
