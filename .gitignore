@@ -64,3 +64,9 @@ buck-out/
 
 #firebase
 /assets/firebase/Firebase.js
+
+#sensitive data
+/assets/constants/Spoon.js
+/assets/constants/SpoonacularApiKey.js
+/assets/constants/cloudinary.js
+/assets/notes/UsingSpoonacular.txt

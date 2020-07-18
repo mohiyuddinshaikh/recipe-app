@@ -27,21 +27,19 @@ import toastComponent from './functions/Toast';
 import * as UserActions from '../store/actions/UserActions';
 import ImagePicker from 'react-native-image-picker';
 import Icon from 'react-native-vector-icons/FontAwesome';
-
-const Blob = RNFetchBlob.polyfill.Blob;
-const fs = RNFetchBlob.fs;
-window.XMLHttpRequest = RNFetchBlob.polyfill.XMLHttpRequest;
-window.Blob = Blob;
+import {uploadImage} from '../api/imageupload/uploadImage';
 
 export default function ProfileScreen1({navigation, route}) {
   const dispatch = useDispatch();
   const isLoggedIn = useSelector(state => state.miscReducer.isLoggedIn);
   const [showContent, setShowContent] = useState(false);
+  const [loader, setLoader] = useState(false);
+
   console.log('isLoggedIn :>> ', isLoggedIn);
   console.log('navigation :>> ', navigation);
 
   const userDataInStore = useSelector(state => state.userReducer.user);
-  console.log('PROFILE SCREEN KA DATA', userDataInStore);
+  console.log('profile screen data', userDataInStore);
 
   useFocusEffect(() => {
     someFunction();
@@ -103,56 +101,12 @@ export default function ProfileScreen1({navigation, route}) {
     console.log('response :>> ', response);
   };
 
-  const uploadImage = (uri, mime = 'application/octet-stream') => {
-    console.log('Test 1');
-    return new Promise((resolve, reject) => {
-      const uploadUri = uri;
-      const sessionId = new Date().getTime();
-      let uploadBlob = null;
-      console.log('Test 2');
+  const image =
+    'https://res.cloudinary.com/recipecloudmoin/image/upload/v1594995906/chef_ciphmo.jpg';
 
-      const imageRef = firebase
-        .storage()
-        .ref('images')
-        .child('somepicture.jpg');
-      fs.readFile(uploadUri, 'base6 ')
-        .then(data => {
-          console.log('Test 3');
-
-          return Blob.build(data, {type: `${mime};BASE64`});
-        })
-        .then(async blob => {
-          console.log('Test 4');
-          // const firebaseUrl = await imageRef.getDownloadURL();
-          // console.log('Download URL is :', firebaseUrl);
-          uploadBlob = blob;
-          return imageRef.put(blob, {contentType: mime});
-        })
-        .then(async () => {
-          console.log('Test 5');
-
-          uploadBlob.close();
-
-          const firebaseUrl = await imageRef.getDownloadURL();
-          console.log('Download URL is :', firebaseUrl);
-          const metadata = imageRef.getMetadata();
-          console.log('metadata :>> ', metadata);
-          storeInDB(firebaseUrl);
-          return imageRef.getDownloadURL();
-        });
-    });
-  };
-
-  // const image = require('../assets/images/chef.jpg');
   const [photo, setPhoto] = useState(
-    'https://res.cloudinary.com/ogcodes/image/upload/v1581387688/m0e7y6s5zkktpceh2moq.jpg',
+    userDataInStore.photo ? userDataInStore.photo : null,
   );
-
-  const storeInDB = async firebaseUrl => {
-    let data = {photo: firebaseUrl};
-    const response = await updateUserData(data);
-    console.log('response :>> ', response);
-  };
 
   const selectPhotoTapped = () => {
     const options = {
@@ -172,6 +126,7 @@ export default function ProfileScreen1({navigation, route}) {
         const uri = response.uri;
         const type = response.type;
         const name = response.fileName;
+        const data = response.data;
         const source = {
           uri,
           type,
@@ -183,23 +138,28 @@ export default function ProfileScreen1({navigation, route}) {
     });
   };
 
-  const cloudinaryUpload = photo => {
+  const cloudinaryUpload = async photo => {
+    setLoader(true);
     const data = new FormData();
     data.append('file', photo);
     data.append('upload_preset', 'recipepreset');
     data.append('cloud_name', 'recipecloudmoin');
     console.log('data :>> ', data);
-    fetch('https://api.cloudinary.com/v1_1/recipecloudmoin/image/upload', {
-      method: 'post',
-      body: data,
-    })
-      .then(res => console.log('res :>> ', res))
-      .then(data => {
-        setPhoto(data.secure_url);
-      })
-      .catch(err => {
-        Alert.alert('An Error Occured While Uploading');
-      });
+    const response = await uploadImage(data);
+    console.log('response :>> ', response);
+    if (response.status == 200) {
+      setPhoto(response.data.secure_url);
+      setLoader(false);
+      // Update database
+      let updatedUserData = {
+        photo: response.data.secure_url,
+      };
+      const resp = await updateUserData(updatedUserData);
+      console.log('resp :>> ', resp);
+      if (resp.status == 200) {
+        toastComponent({message: 'Update Successful'});
+      }
+    }
   };
 
   return (
@@ -215,51 +175,47 @@ export default function ProfileScreen1({navigation, route}) {
                 justifyContent: 'center',
               }}>
               <View>
-                <TouchableOpacity
-                  activeOpacity={1}
-                  onPress={() => {
-                    selectPhotoTapped();
-                  }}>
-                  <Image
-                    source={{uri: photo}}
-                    style={{
-                      width: 100,
-                      height: 100,
-                      borderRadius: 50,
-                    }}
-                  />
-                  {/* {photo == null ? (
-                    <Image
-                      source={image}
-                      style={{
-                        width: 100,
-                        height: 100,
-                        borderRadius: 50,
-                      }}
-                    />
-                  ) : (
-                    <Image
-                      source={{uri: photo}}
-                      style={{
-                        width: 100,
-                        height: 100,
-                        borderRadius: 50,
-                      }}
-                    />
-                  )} */}
-
-                  {/* 
-                  <Icon
-                    style={styles.cameraIcon}
-                    name={'camera'}
-                    size={12}
-                    color={colors.themeColor}
+                {loader ? (
+                  <View>
+                    <ActivityIndicator color={colors.themeColor} />
+                  </View>
+                ) : (
+                  <TouchableOpacity
+                    activeOpacity={1}
                     onPress={() => {
-                      console.log('Camera pressed');
-                      demoUpload();
-                    }}
-                  /> */}
-                </TouchableOpacity>
+                      selectPhotoTapped();
+                    }}>
+                    {photo == null ? (
+                      <Image
+                        source={{uri: image}}
+                        style={{
+                          width: 100,
+                          height: 100,
+                          borderRadius: 50,
+                        }}
+                      />
+                    ) : (
+                      <Image
+                        source={{uri: photo}}
+                        style={{
+                          width: 100,
+                          height: 100,
+                          borderRadius: 50,
+                        }}
+                      />
+                    )}
+
+                    <Icon
+                      style={styles.cameraIcon}
+                      name={'camera'}
+                      size={12}
+                      color={colors.themeColor}
+                      onPress={() => {
+                        selectPhotoTapped();
+                      }}
+                    />
+                  </TouchableOpacity>
+                )}
               </View>
 
               <Text style={styles.helloText}>
